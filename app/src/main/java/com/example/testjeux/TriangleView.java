@@ -1,4 +1,5 @@
 package com.example.testjeux;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +15,8 @@ public class TriangleView extends View {
     private int desiredWidth; // Desired width of the image
     private int desiredHeight; // Desired height of the image
     private float imageX, imageY; // Position of the image
+    private float touchX; // X position of the user's touch
+    private boolean isMoving; // Flag to indicate if the image is moving
 
     public TriangleView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -23,6 +26,7 @@ public class TriangleView extends View {
         desiredHeight = 200; // Desired height of the image (in pixels)
         imageX = 450; // Initial X position of the image
         imageY = 1100; // Initial Y position of the image
+        isMoving = false; // Initially, the image is not moving
     }
 
     @Override
@@ -55,25 +59,25 @@ public class TriangleView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
-                // Calculate the direction of the touch event
-                float touchX = event.getX();
-                float directionX = 0;
-                if (touchX > getWidth() / 2) {
-                    directionX = 1;
-                } else {
-                    directionX = -1;
-                }
+                // Get the X position of the touch
+                touchX = event.getX();
 
-                // Calculate the new position of the image
-                float newImageX = imageX + directionX * 10;
+                // Calculate new X position for the image centered on the touch
+                imageX = touchX - desiredWidth / 2.0f;
 
-                // Update the position of the image
-                imageX = Math.min(getWidth() - desiredWidth, Math.max(0, newImageX));
+                // Ensure the image does not go out of the view bounds
+                imageX = Math.max(0, Math.min(imageX, getWidth() - desiredWidth));
 
-                invalidate(); // Redraw the view
-                return true;
+                // Redraw the view
+                invalidate();
+                break;
+
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                // Optionally, you can add logic here if you want something to happen when the touch ends
+                break;
         }
-        return super.onTouchEvent(event);
+        return true;
     }
 
 }
