@@ -22,7 +22,7 @@ public class TriangleView extends View {
         desiredWidth = 200; // Desired width of the image (in pixels)
         desiredHeight = 200; // Desired height of the image (in pixels)
         imageX = 450; // Initial X position of the image
-        imageY = 1800; // Initial Y position of the image
+        imageY = 1100; // Initial Y position of the image
     }
 
     @Override
@@ -57,27 +57,18 @@ public class TriangleView extends View {
             case MotionEvent.ACTION_MOVE:
                 // Calculate the direction of the touch event
                 float touchX = event.getX();
-                float touchY = event.getY();
                 float directionX = 0;
-                float directionY = 0;
                 if (touchX > getWidth() / 2) {
                     directionX = 1;
                 } else {
                     directionX = -1;
                 }
-                if (touchY > getHeight() / 2) {
-                    directionY = 1;
-                } else {
-                    directionY = -1;
-                }
 
                 // Calculate the new position of the image
                 float newImageX = imageX + directionX * 10;
-                float newImageY = imageY + directionY * 10;
 
                 // Update the position of the image
                 imageX = Math.min(getWidth() - desiredWidth, Math.max(0, newImageX));
-                imageY = Math.min(getHeight() - desiredHeight, Math.max(0, newImageY));
 
                 invalidate(); // Redraw the view
                 return true;
