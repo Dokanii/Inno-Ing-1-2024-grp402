@@ -59,25 +59,54 @@ public class TriangleView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
-                // Get the X position of the touch
-                touchX = event.getX();
-
-                // Calculate new X position for the image centered on the touch
-                imageX = touchX - desiredWidth / 2.0f;
-
-                // Ensure the image does not go out of the view bounds
-                imageX = Math.max(0, Math.min(imageX, getWidth() - desiredWidth));
-
-                // Redraw the view
-                invalidate();
+                float touchX = event.getX();
+                // Check if the touch is on the left or right side of the screen
+                if (touchX > getWidth() / 2) {
+                    // Touch is on the right side of the screen
+                    moveImage(true);  // Move right
+                } else {
+                    // Touch is on the left side of the screen
+                    moveImage(false); // Move left
+                }
                 break;
-
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                // Optionally, you can add logic here if you want something to happen when the touch ends
+                // Stop moving the image
+                isMoving = false;
                 break;
         }
         return true;
     }
 
+    private void moveImage(final boolean moveRight) {
+        if (!isMoving) {
+            isMoving = true;
+            final float speed = 20.0f; // Speed of the movement
+
+            Runnable moveRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (isMoving) {
+                        // Update imageX based on direction
+                        if (moveRight) {
+                            imageX += speed;
+                        } else {
+                            imageX -= speed;
+                        }
+
+                        // Ensure the image remains within the view bounds
+                        imageX = Math.max(0, Math.min(imageX, getWidth() - desiredWidth));
+
+                        // Redraw the view
+                        invalidate();
+
+                        // Recurse to continue moving
+                        postDelayed(this, 16); // roughly 60 FPS
+                    }
+                }
+            };
+
+            post(moveRunnable);
+        }
+    }
 }
