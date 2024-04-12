@@ -23,7 +23,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".TriangleActivity" />
+
     </application>
 
 </manifest>
-
