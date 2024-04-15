@@ -28,7 +28,7 @@ public class TriangleView extends View {
         desiredWidth = 200; // Largeur souhaitée de l'image (en pixels)
         desiredHeight = 200; // Hauteur souhaitée de l'image (en pixels)
         characterX = 450; // Position X initiale du personnage
-        characterY = 1100; // Position Y initiale du personnage
+        characterY = 0; // Position Y initiale du personnage
         isMoving = false; // Initialement, le personnage ne bouge pas
         backgroundHeight = backgroundBitmap.getHeight(); // Récupérer la hauteur de l'image de fond
     }
@@ -47,7 +47,7 @@ public class TriangleView extends View {
         Bitmap resizedCharacterBitmap = getResizedBitmap(characterBitmap, desiredWidth, desiredHeight);
 
         // Dessiner l'image du personnage à sa position actuelle
-        canvas.drawBitmap(resizedCharacterBitmap, characterX, characterY, null);
+        canvas.drawBitmap(resizedCharacterBitmap, characterX, 1100, null);
     }
 
     // Méthode pour redimensionner une bitmap
@@ -126,7 +126,7 @@ public class TriangleView extends View {
     private void moveBackground() {
         final float backgroundSpeed = 50.0f; // Vitesse du défilement de l'image de fond
         // Mettre à jour characterY pour déplacer l'image de fond vers le haut avec une vitesse différente
-        characterY -= backgroundSpeed;
+        characterY += backgroundSpeed;
 
         // Si l'image de fond sort complètement de l'écran en haut, réinitialiser sa position Y
         if (characterY <= -backgroundHeight) {
