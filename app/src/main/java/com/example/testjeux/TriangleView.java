@@ -16,7 +16,6 @@ public class TriangleView extends View {
     private int desiredWidth; // Largeur souhaitée de l'image
     private int desiredHeight; // Hauteur souhaitée de l'image
     private float characterX, characterY; // Position du personnage
-    private float touchX; // Position X du toucher de l'utilisateur
     private boolean isMoving; // Indique si le personnage est en mouvement
 
     public TriangleView(Context context, AttributeSet attrs) {
@@ -36,8 +35,8 @@ public class TriangleView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        // Dessine l'image de fond
-        canvas.drawBitmap(backgroundBitmap, 0, 0, null);
+        // Dessine l'image de fond à la position actuelle
+        canvas.drawBitmap(backgroundBitmap, 0, characterY, null);
 
         // Redimensionne l'image du personnage à la taille souhaitée
         Bitmap resizedCharacterBitmap = getResizedBitmap(characterBitmap, desiredWidth, desiredHeight);
@@ -103,6 +102,9 @@ public class TriangleView extends View {
                         // Assurer que le personnage reste dans les limites de la vue
                         characterX = Math.max(0, Math.min(characterX, getWidth() - desiredWidth));
 
+                        // Faire défiler l'image de fond
+                        moveBackground(true);
+
                         // Redessiner la vue
                         invalidate();
 
@@ -114,5 +116,18 @@ public class TriangleView extends View {
 
             post(moveRunnable);
         }
+    }
+
+    private void moveBackground(final boolean moveDown) {
+        final float speed = 10.0f; // Vitesse du défilement
+        // Mettre à jour characterY en fonction de la direction
+        if (moveDown) {
+            characterY += speed;
+        } else {
+            characterY -= speed;
+        }
+
+        // Assurer que le personnage reste dans les limites de la vue
+        characterY = Math.max(0, Math.min(characterY, getHeight() - desiredHeight));
     }
 }
