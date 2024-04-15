@@ -40,8 +40,8 @@ public class TriangleView extends View {
         // Redimensionner l'image de fond pour qu'elle remplisse l'écran
         Bitmap resizedBackgroundBitmap = Bitmap.createScaledBitmap(backgroundBitmap, getWidth(), getHeight(), true);
 
-        // Dessiner l'image de fond redimensionnée
-        canvas.drawBitmap(resizedBackgroundBitmap, 0, 0, null);
+        // Dessiner l'image de fond redimensionnée avec un décalage vertical pour simuler le défilement
+        canvas.drawBitmap(resizedBackgroundBitmap, 0, characterY, null);
 
         // Redimensionner l'image du personnage à la taille souhaitée
         Bitmap resizedCharacterBitmap = getResizedBitmap(characterBitmap, desiredWidth, desiredHeight);
@@ -91,7 +91,7 @@ public class TriangleView extends View {
     private void moveCharacter(final boolean moveRight) {
         if (!isMoving) {
             isMoving = true;
-            final float speed = 20.0f; // Vitesse du mouvement
+            final float speed = 20.0f; // Vitesse du mouvement du personnage
 
             Runnable moveRunnable = new Runnable() {
                 @Override
@@ -108,7 +108,7 @@ public class TriangleView extends View {
                         characterX = Math.max(0, Math.min(characterX, getWidth() - desiredWidth));
 
                         // Faire défiler l'image de fond
-                        moveBackground(true);
+                        moveBackground(); // Appel à moveBackground ici
 
                         // Redessiner la vue
                         invalidate();
@@ -123,24 +123,14 @@ public class TriangleView extends View {
         }
     }
 
-    private void moveBackground(final boolean moveUp) {
-        final float speed = 10.0f; // Vitesse du défilement
-        // Mettre à jour characterY en fonction de la direction
-        if (moveUp) {
-            characterY -= speed;
-        } else {
-            characterY += speed;
-        }
+    private void moveBackground() {
+        final float backgroundSpeed = 50.0f; // Vitesse du défilement de l'image de fond
+        // Mettre à jour characterY pour déplacer l'image de fond vers le haut avec une vitesse différente
+        characterY -= backgroundSpeed;
 
-        // Si l'image de fond sort complètement de l'écran en haut, réinitialiser sa position Y et charger une nouvelle image de fond
+        // Si l'image de fond sort complètement de l'écran en haut, réinitialiser sa position Y
         if (characterY <= -backgroundHeight) {
-            characterY = 0;
-            backgroundBitmap.recycle(); // Libérer la mémoire de l'image de fond actuelle
-            backgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.fond);
-            backgroundHeight = backgroundBitmap.getHeight(); // Mettre à jour la hauteur de l'image de fond
+            characterY = getHeight();
         }
-
-        // Assurer que le personnage reste dans les limites de la vue
-        characterY = Math.max(0, Math.min(characterY, getHeight() - desiredHeight));
     }
 }
