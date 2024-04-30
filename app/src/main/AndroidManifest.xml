@@ -6,8 +6,8 @@
     <application
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
+        android:label="Jeu Test"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TEstJeux"
@@ -24,7 +24,7 @@
         </activity>
 
         <activity android:name=".TriangleActivity" />
-
+        <activity android:name=".PauseButtonActivity" />
     </application>
 
 </manifest>
