@@ -1,6 +1,7 @@
 package com.example.testjeux;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -9,58 +10,57 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-public class TriangleView extends View {
+import androidx.annotation.Nullable;
 
+public class TriangleView extends View {
     private Bitmap backgroundBitmap;
     private Bitmap characterBitmap;
-    private int desiredWidth; // Largeur souhaitée de l'image
-    private int desiredHeight; // Hauteur souhaitée de l'image
-    private float characterX, characterY; // Position du personnage
-    private boolean isMoving; // Indique si le personnage est en mouvement
-    private int backgroundHeight; // Hauteur de l'image de fond
+    private int desiredWidth;
+    private int desiredHeight;
+    private float characterX, characterY;
+    private boolean isMoving;
+    private int backgroundHeight;
 
-    public TriangleView(Context context, AttributeSet attrs) {
+    public TriangleView(Context context) {
+        super(context);
+        init();
+    }
+
+    public TriangleView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        // Charger l'image de fond depuis les ressources
+        init();
+    }
+
+    private void init() {
         backgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.fond);
-        // Charger l'image du personnage depuis les ressources
         characterBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.b99c708025ea1ae4a3a5484907990c4e);
-        desiredWidth = 200; // Largeur souhaitée de l'image (en pixels)
-        desiredHeight = 200; // Hauteur souhaitée de l'image (en pixels)
-        characterX = 450; // Position X initiale du personnage
-        characterY = 0; // Position Y initiale du personnage
-        isMoving = false; // Initialement, le personnage ne bouge pas
-        backgroundHeight = backgroundBitmap.getHeight(); // Récupérer la hauteur de l'image de fond
+
+        desiredWidth = 200;
+        desiredHeight = 200;
+        characterX = 450;
+        characterY = 0;
+        isMoving = false;
+        backgroundHeight = backgroundBitmap.getHeight();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        // Redimensionner l'image de fond pour qu'elle remplisse l'écran
         Bitmap resizedBackgroundBitmap = Bitmap.createScaledBitmap(backgroundBitmap, getWidth(), getHeight(), true);
-
-        // Dessiner l'image de fond redimensionnée avec un décalage vertical pour simuler le défilement
         canvas.drawBitmap(resizedBackgroundBitmap, 0, characterY, null);
 
-        // Redimensionner l'image du personnage à la taille souhaitée
         Bitmap resizedCharacterBitmap = getResizedBitmap(characterBitmap, desiredWidth, desiredHeight);
-
-        // Dessiner l'image du personnage à sa position actuelle
         canvas.drawBitmap(resizedCharacterBitmap, characterX, 1100, null);
     }
 
-    // Méthode pour redimensionner une bitmap
     private Bitmap getResizedBitmap(Bitmap bitmap, int width, int height) {
-        // Calcul du facteur d'échelle
         float scaleWidth = ((float) width) / bitmap.getWidth();
         float scaleHeight = ((float) height) / bitmap.getHeight();
 
-        // Création d'une matrice pour le facteur d'échelle
         Matrix matrix = new Matrix();
         matrix.postScale(scaleWidth, scaleHeight);
 
-        // Application de la matrice à la bitmap
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
     }
 
@@ -70,18 +70,14 @@ public class TriangleView extends View {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
                 float touchX = event.getX();
-                // Vérifier si le toucher est sur le côté gauche ou droit de l'écran
                 if (touchX > getWidth() / 2) {
-                    // Toucher sur le côté droit de l'écran
-                    moveCharacter(true);  // Déplacer vers la droite
+                    moveCharacter(true);
                 } else {
-                    // Toucher sur le côté gauche de l'écran
-                    moveCharacter(false); // Déplacer vers la gauche
+                    moveCharacter(false);
                 }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                // Arrêter le mouvement du personnage
                 isMoving = false;
                 break;
         }
@@ -91,44 +87,32 @@ public class TriangleView extends View {
     private void moveCharacter(final boolean moveRight) {
         if (!isMoving) {
             isMoving = true;
-            final float speed = 20.0f; // Vitesse du mouvement du personnage
+            final float speed = 20.0f;
 
             Runnable moveRunnable = new Runnable() {
                 @Override
                 public void run() {
                     if (isMoving) {
-                        // Mettre à jour characterX en fonction de la direction
                         if (moveRight) {
                             characterX += speed;
                         } else {
                             characterX -= speed;
                         }
-
-                        // Assurer que le personnage reste dans les limites de la vue
                         characterX = Math.max(0, Math.min(characterX, getWidth() - desiredWidth));
-
-                        // Faire défiler l'image de fond
-                        moveBackground(); // Appel à moveBackground ici
-
-                        // Redessiner la vue
+                        moveBackground();
                         invalidate();
-
-                        // Récursion pour continuer le mouvement
-                        postDelayed(this, 16); // environ 60 FPS
+                        postDelayed(this, 16);
                     }
                 }
             };
-
             post(moveRunnable);
         }
     }
 
     private void moveBackground() {
-        final float backgroundSpeed = 50.0f; // Vitesse du défilement de l'image de fond
-        // Mettre à jour characterY pour déplacer l'image de fond vers le haut avec une vitesse différente
-        characterY += backgroundSpeed;
+        final float backgroundSpeed = 50.0f;
+        characterY+= backgroundSpeed;
 
-        // Si l'image de fond sort complètement de l'écran en haut, réinitialiser sa position Y
         if (characterY <= -backgroundHeight) {
             characterY = getHeight();
         }
