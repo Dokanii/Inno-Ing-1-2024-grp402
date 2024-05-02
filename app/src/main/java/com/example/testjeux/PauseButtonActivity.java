@@ -9,5 +9,8 @@ public class PauseButtonActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pause_button);
+
+        // Supprimer la barre d'action
+        getSupportActionBar().hide();
     }
 }
