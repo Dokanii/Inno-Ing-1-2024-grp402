@@ -1,0 +1,58 @@
+package com.example.testjeux;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.util.DisplayMetrics;
+
+public class Asteroid {
+
+    private float x;
+    private float y;
+    private float speed;
+    private int size;
+    private Bitmap bitmap;
+    private int desiredWidth;
+    private int desiredHeight;
+
+
+
+    // Constructeur
+
+
+    public Asteroid(Context context, float x, float y) {
+        bitmap= BitmapFactory.decodeResource(context.getResources(), R.drawable.b99c708025ea1ae4a3a5484907990c4e);
+        this.x = x;
+        this.y = y;
+        desiredWidth = 200;
+        desiredHeight = 200;
+        this.speed = (float) (Math.random() * 5 + 1); // Vitesse aléatoire entre 1 et 5
+        this.bitmap = getResizedAsteroidBitmap(bitmap, desiredWidth, desiredHeight);
+    }
+
+    private Bitmap getResizedAsteroidBitmap(Bitmap bitmap, int width, int height) {
+        float scaleWidth = ((float) width) / bitmap.getWidth();
+        float scaleHeight = ((float) height) / bitmap.getHeight();
+
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
+    }
+
+    // Méthode de mise à jour de l'astéroïde
+    public void update() {
+        y += speed;
+    }
+
+    // Méthode de dessin de l'astéroïde
+    public void draw(Canvas canvas) {
+        canvas.drawBitmap(bitmap, x, y, null);
+    }
+    public float getY() {
+        return y;
+    }
+
+}
