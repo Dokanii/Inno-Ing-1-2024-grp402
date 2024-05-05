@@ -42,7 +42,7 @@ public class TriangleView extends View {
 
     private void init(Context context) {
         backgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.fond);
-        characterBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.b99c708025ea1ae4a3a5484907990c4e);
+        characterBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.spaceship);
 
         desiredWidth = 200;
         desiredHeight = 200;
@@ -115,7 +115,7 @@ public class TriangleView extends View {
                             characterX -= speed;
                         }
                         characterX = Math.max(0, Math.min(characterX, getWidth() - desiredWidth));
-                        moveBackground();
+                        //moveBackground();
                         //update();
                         invalidate();
                         postDelayed(this, 16);

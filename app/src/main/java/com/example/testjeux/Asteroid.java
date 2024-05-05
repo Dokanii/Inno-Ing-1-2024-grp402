@@ -24,7 +24,7 @@ public class Asteroid {
 
 
     public Asteroid(Context context, float x, float y) {
-        bitmap= BitmapFactory.decodeResource(context.getResources(), R.drawable.b99c708025ea1ae4a3a5484907990c4e);
+        bitmap= BitmapFactory.decodeResource(context.getResources(), R.drawable.asteroid2);
         this.x = x;
         this.y = y;
         taille = (int) (Math.random() * (250 - 100 + 1) + 100);
