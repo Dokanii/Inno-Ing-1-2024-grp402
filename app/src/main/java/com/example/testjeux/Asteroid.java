@@ -30,7 +30,7 @@ public class Asteroid {
         taille = (int) (Math.random() * (250 - 100 + 1) + 100);
         desiredWidth = taille;
         desiredHeight = taille;
-        this.speed = (float) (Math.random() * 5 + 1); // Vitesse aléatoire entre 1 et 5
+        this.speed = (float) (Math.random() * 5 + 1);
         this.bitmap = getResizedAsteroidBitmap(bitmap, desiredWidth, desiredHeight);
     }
 

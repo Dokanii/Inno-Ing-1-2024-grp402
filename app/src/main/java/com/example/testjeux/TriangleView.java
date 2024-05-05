@@ -32,6 +32,7 @@ public class TriangleView extends View {
     public TriangleView(Context context) {
         super(context);
         init(context);
+
     }
 
     public TriangleView(Context context, @Nullable AttributeSet attrs) {
@@ -49,6 +50,7 @@ public class TriangleView extends View {
         characterY = 0;
         isMoving = false;
         backgroundHeight = backgroundBitmap.getHeight();
+        startGeneratingAsteroids();
     }
 
     @Override
@@ -103,6 +105,7 @@ public class TriangleView extends View {
             Runnable moveRunnable = new Runnable() {
                 @Override
                 public void run() {
+
                     if (isMoving) {
                         if (moveRight) {
                             characterX += speed;
@@ -111,7 +114,7 @@ public class TriangleView extends View {
                         }
                         characterX = Math.max(0, Math.min(characterX, getWidth() - desiredWidth));
                         moveBackground();
-                        update();
+                        ;
                         invalidate();
                         postDelayed(this, 16);
                     }
@@ -160,17 +163,27 @@ public class TriangleView extends View {
 
         // Supprimer les astéroïdes de la liste principale
         asteroids.removeAll(asteroidsToRemove);
+        invalidate();
     }
 
     private void update() {
-        // Générer un nouvel astéroïde toutes les 100 frames
-        if (frameCount % 100 == 0) {
-            generateAsteroid(getContext());
-        }
+        updateAsteroids(); // Met à jour la position des astéroïdes
+        invalidate(); // Redessine la vue
+    }
 
-        // Mettre à jour la position des astéroïdes
-        updateAsteroids();
-        frameCount++;
-        invalidate();
+    private void startGeneratingAsteroids() {
+        // Crée une tâche périodique pour générer les astéroïdes toutes les X millisecondes
+        Runnable asteroidGenerator = new Runnable() {
+            @Override
+            public void run() {
+                update();
+                generateAsteroid(getContext());
+                postDelayed(this, 1000); // Générer un astéroïde toutes les 1.5 secondes
+
+            }
+        };
+
+        // Lance la génération des astéroïdes
+        post(asteroidGenerator);
     }
 }
