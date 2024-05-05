@@ -51,6 +51,7 @@ public class TriangleView extends View {
         isMoving = false;
         backgroundHeight = backgroundBitmap.getHeight();
         startGeneratingAsteroids();
+        startUpdatingAsteroids();
     }
 
     @Override
@@ -106,6 +107,7 @@ public class TriangleView extends View {
                 @Override
                 public void run() {
 
+
                     if (isMoving) {
                         if (moveRight) {
                             characterX += speed;
@@ -114,7 +116,7 @@ public class TriangleView extends View {
                         }
                         characterX = Math.max(0, Math.min(characterX, getWidth() - desiredWidth));
                         moveBackground();
-                        ;
+                        //update();
                         invalidate();
                         postDelayed(this, 16);
                     }
@@ -176,14 +178,26 @@ public class TriangleView extends View {
         Runnable asteroidGenerator = new Runnable() {
             @Override
             public void run() {
-                update();
                 generateAsteroid(getContext());
-                postDelayed(this, 1000); // Générer un astéroïde toutes les 1.5 secondes
-
+                postDelayed(this, 2000); // Génère un astéroïde toutes les 1.5 secondes
             }
         };
 
         // Lance la génération des astéroïdes
         post(asteroidGenerator);
+    }
+
+    private void startUpdatingAsteroids() {
+        // Crée une tâche périodique pour mettre à jour les astéroïdes toutes les X millisecondes
+        Runnable asteroidUpdater = new Runnable() {
+            @Override
+            public void run() {
+                update();
+                postDelayed(this, 10); // Met à jour les astéroïdes environ toutes les 16 millisecondes
+            }
+        };
+
+        // Lance la mise à jour des astéroïdes
+        post(asteroidUpdater);
     }
 }
