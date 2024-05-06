@@ -54,8 +54,11 @@ public class Asteroid {
     public void draw(Canvas canvas) {
         canvas.drawBitmap(bitmap, x, y, null);
     }
-    public float getY() {
-        return y;
-    }
+    public float getY() {return y;}
+    public float getX() {return x;}
+    public float getWidth() {return desiredWidth;}
+    public float getHeight() {return desiredHeight;}
+
+
 
 }

@@ -26,6 +26,8 @@ public class TriangleView extends View {
     private boolean isMoving;
     private int backgroundHeight;
 
+    private boolean isGameOver = false;
+
     private List<Asteroid> asteroids = new ArrayList<>();
     private int frameCount = 0;
 
@@ -44,8 +46,8 @@ public class TriangleView extends View {
         backgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.fond);
         characterBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.spaceship);
 
-        desiredWidth = 200;
-        desiredHeight = 200;
+        desiredWidth = 150;
+        desiredHeight = 150;
         characterX = 450;
         characterY = 0;
         isMoving = false;
@@ -62,7 +64,7 @@ public class TriangleView extends View {
         canvas.drawBitmap(resizedBackgroundBitmap, 0, characterY, null);
 
         Bitmap resizedCharacterBitmap = getResizedBitmap(characterBitmap, desiredWidth, desiredHeight);
-        canvas.drawBitmap(resizedCharacterBitmap, characterX, 1100, null);
+        canvas.drawBitmap(resizedCharacterBitmap, characterX, 1400, null);
 
         // Dessiner les astéroïdes
         for (Asteroid asteroid : asteroids) {
@@ -170,6 +172,15 @@ public class TriangleView extends View {
 
     private void update() {
         updateAsteroids(); // Met à jour la position des astéroïdes
+
+        for (Asteroid asteroid : asteroids) {
+            if (checkCollision(asteroid)) {
+                // Collision détectée, arrête le jeu
+                stopGame();
+                return;
+            }
+        }
+
         invalidate(); // Redessine la vue
     }
 
@@ -178,8 +189,9 @@ public class TriangleView extends View {
         Runnable asteroidGenerator = new Runnable() {
             @Override
             public void run() {
+                if (isGameOver == false){
                 generateAsteroid(getContext());
-                postDelayed(this, 2000); // Génère un astéroïde toutes les 1.5 secondes
+                postDelayed(this, 2000);} // Génère un astéroïde toutes les 1.5 secondes
             }
         };
 
@@ -192,12 +204,38 @@ public class TriangleView extends View {
         Runnable asteroidUpdater = new Runnable() {
             @Override
             public void run() {
-                update();
-                postDelayed(this, 10); // Met à jour les astéroïdes environ toutes les 16 millisecondes
+                if (isGameOver == false){
+                    update();
+                    postDelayed(this, 10);}
             }
         };
 
         // Lance la mise à jour des astéroïdes
         post(asteroidUpdater);
+    }
+
+    private boolean checkCollision(Asteroid asteroid) {
+        // Coordonnées du vaisseau spatial
+        float spaceshipLeft = characterX;
+        float spaceshipRight = characterX + desiredWidth;
+        float spaceshipTop = 1400;
+        float spaceshipBottom = 1400 + desiredHeight;
+
+        // Coordonnées de l'astéroïde
+        float asteroidLeft = asteroid.getX();
+        float asteroidRight = asteroid.getX() + asteroid.getWidth();
+        float asteroidTop = asteroid.getY();
+        float asteroidBottom = asteroid.getY() + asteroid.getHeight();
+
+        // Vérifie si les coordonnées du vaisseau spatial se trouvent à l'intérieur des coordonnées de l'astéroïde
+        return spaceshipLeft < asteroidRight && spaceshipRight > asteroidLeft &&
+                spaceshipTop < asteroidBottom && spaceshipBottom > asteroidTop;
+    }
+
+    private void stopGame() {
+        // Arrête la génération d'astéroïdes
+        isGameOver = true;
+        // Désactive la possibilité de déplacer le personnage
+        isMoving = false;
     }
 }
