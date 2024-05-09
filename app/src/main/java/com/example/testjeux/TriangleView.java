@@ -19,13 +19,15 @@ import java.util.List;
 public class TriangleView extends View {
 
     private Bitmap backgroundBitmap;
+    private Bitmap background2Bitmap;
     private Bitmap characterBitmap;
     private Bitmap flammeBitmap;
     private int desiredWidth;
     private int desiredHeight;
-    private float characterX, characterY;
+    private float characterX, fond1Y, fond2Y;
     private boolean isMoving;
     private int backgroundHeight;
+    private int background2Height;
 
     private float flammeX, flammeY;
 
@@ -33,6 +35,10 @@ public class TriangleView extends View {
 
     private List<Asteroid> asteroids = new ArrayList<>();
     private int frameCount = 0;
+    private int fond1Height;
+    private int fond2Height;
+
+    private static final float BACKGROUND_SPEED = 40.0f;
 
     public TriangleView(Context context) {
         super(context);
@@ -47,16 +53,21 @@ public class TriangleView extends View {
 
     private void init(Context context) {
         backgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.fond);
+        background2Bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.fond);
         characterBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.spaceship);
         flammeBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.flamme);
 
         desiredWidth = 150;
         desiredHeight = 150;
         characterX = 450;
-        characterY = 0;
+        fond1Y = 0;
+        fond2Y = 0;
         flammeX = characterX;
         isMoving = false;
         backgroundHeight = backgroundBitmap.getHeight();
+        background2Height = background2Bitmap.getHeight();
+        fond1Height = backgroundHeight;
+        fond2Height = background2Height;
         startGeneratingAsteroids();
         startUpdatingAsteroids();
     }
@@ -65,8 +76,12 @@ public class TriangleView extends View {
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
-        @SuppressLint("DrawAllocation") Bitmap resizedBackgroundBitmap = Bitmap.createScaledBitmap(backgroundBitmap, getWidth(), getHeight(), true);
-        canvas.drawBitmap(resizedBackgroundBitmap, 0, characterY, null);
+        Bitmap resizedBackgroundBitmap = Bitmap.createScaledBitmap(backgroundBitmap, getWidth(), getHeight(), true);
+        canvas.drawBitmap(resizedBackgroundBitmap, 0, fond1Y, null);
+
+        Bitmap resizedBackground2Bitmap = Bitmap.createScaledBitmap(background2Bitmap, getWidth(), getHeight(), true);
+        canvas.drawBitmap(resizedBackground2Bitmap, 0, fond2Y - getHeight(), null);
+
 
         Bitmap resizedCharacterBitmap = getResizedBitmap(characterBitmap, desiredWidth, desiredHeight);
         canvas.drawBitmap(resizedCharacterBitmap, characterX, 1400, null);
@@ -129,8 +144,7 @@ public class TriangleView extends View {
                         }
                         characterX = Math.max(0, Math.min(characterX, getWidth() - desiredWidth));
                         showFlamme();
-                        //moveBackground();
-                        //update();
+                        moveBackground();
                         invalidate();
                         postDelayed(this, 16);
                     }
@@ -141,12 +155,13 @@ public class TriangleView extends View {
     }
 
     private void moveBackground() {
-        final float backgroundSpeed = 50.0f;
-        characterY+= backgroundSpeed;
+        updateBackgroundPositions();
+        invalidate();
+    }
 
-        if (characterY <= -backgroundHeight) {
-            characterY = getHeight();
-        }
+    private void updateBackgroundPositions() {
+        fond1Y = (fond1Y + BACKGROUND_SPEED) % backgroundHeight;
+        fond2Y = (fond2Y + BACKGROUND_SPEED) % background2Height;
     }
 
     private void generateAsteroid(Context context) {
