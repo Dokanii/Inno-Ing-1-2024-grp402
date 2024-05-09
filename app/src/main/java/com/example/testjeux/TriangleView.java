@@ -20,11 +20,14 @@ public class TriangleView extends View {
 
     private Bitmap backgroundBitmap;
     private Bitmap characterBitmap;
+    private Bitmap flammeBitmap;
     private int desiredWidth;
     private int desiredHeight;
     private float characterX, characterY;
     private boolean isMoving;
     private int backgroundHeight;
+
+    private float flammeX, flammeY;
 
     private boolean isGameOver = false;
 
@@ -45,11 +48,13 @@ public class TriangleView extends View {
     private void init(Context context) {
         backgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.fond);
         characterBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.spaceship);
+        flammeBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.flamme);
 
         desiredWidth = 150;
         desiredHeight = 150;
         characterX = 450;
         characterY = 0;
+        flammeX = characterX;
         isMoving = false;
         backgroundHeight = backgroundBitmap.getHeight();
         startGeneratingAsteroids();
@@ -65,6 +70,10 @@ public class TriangleView extends View {
 
         Bitmap resizedCharacterBitmap = getResizedBitmap(characterBitmap, desiredWidth, desiredHeight);
         canvas.drawBitmap(resizedCharacterBitmap, characterX, 1400, null);
+
+        Bitmap resizedFlammeBitmap = getResizedBitmap(flammeBitmap, desiredWidth-50, desiredHeight-50);
+        canvas.drawBitmap(resizedFlammeBitmap, flammeX, flammeY, null);
+        hideFlamme();
 
         // Dessiner les astéroïdes
         for (Asteroid asteroid : asteroids) {
@@ -91,10 +100,12 @@ public class TriangleView extends View {
             case MotionEvent.ACTION_MOVE:
                 float touchX = event.getX();
                 moveCharacter(touchX > (float) getWidth() / 2);
+                showFlamme();
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 isMoving = false;
+                hideFlamme();
                 break;
         }
         return true;
@@ -117,6 +128,7 @@ public class TriangleView extends View {
                             characterX -= speed;
                         }
                         characterX = Math.max(0, Math.min(characterX, getWidth() - desiredWidth));
+                        showFlamme();
                         //moveBackground();
                         //update();
                         invalidate();
@@ -237,5 +249,17 @@ public class TriangleView extends View {
         isGameOver = true;
         // Désactive la possibilité de déplacer le personnage
         isMoving = false;
+    }
+
+    private void showFlamme() {
+        flammeX = characterX+25; // Positionner la flamme sur le personnage
+        flammeY = 1400 + desiredHeight-5; // Positionner la flamme juste en dessous du personnage
+        invalidate(); // Redessiner la vue pour afficher la flamme
+    }
+
+    // Cacher la flamme
+    private void hideFlamme() {
+        flammeY = getHeight(); // Faire disparaître la flamme en dehors de l'écran
+        invalidate(); // Redessiner la vue pour cacher la flamme
     }
 }
