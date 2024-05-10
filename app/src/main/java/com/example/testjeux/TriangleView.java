@@ -19,15 +19,26 @@ import java.util.List;
 public class TriangleView extends View {
 
     private Bitmap backgroundBitmap;
+    private Bitmap background2Bitmap;
     private Bitmap characterBitmap;
+    private Bitmap flammeBitmap;
     private int desiredWidth;
     private int desiredHeight;
-    private float characterX, characterY;
+    private float characterX, fond1Y, fond2Y;
     private boolean isMoving;
     private int backgroundHeight;
+    private int background2Height;
+
+    private float flammeX, flammeY;
+
+    private boolean isGameOver = false;
 
     private List<Asteroid> asteroids = new ArrayList<>();
     private int frameCount = 0;
+    private int fond1Height;
+    private int fond2Height;
+
+    private static final float BACKGROUND_SPEED = 40.0f;
 
     public TriangleView(Context context) {
         super(context);
@@ -42,14 +53,21 @@ public class TriangleView extends View {
 
     private void init(Context context) {
         backgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.fond);
+        background2Bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.fond);
         characterBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.spaceship);
+        flammeBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.flamme);
 
-        desiredWidth = 200;
-        desiredHeight = 200;
+        desiredWidth = 150;
+        desiredHeight = 150;
         characterX = 450;
-        characterY = 0;
+        fond1Y = 0;
+        fond2Y = 0;
+        flammeX = characterX;
         isMoving = false;
         backgroundHeight = backgroundBitmap.getHeight();
+        background2Height = background2Bitmap.getHeight();
+        fond1Height = backgroundHeight;
+        fond2Height = background2Height;
         startGeneratingAsteroids();
         startUpdatingAsteroids();
     }
@@ -58,11 +76,19 @@ public class TriangleView extends View {
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
-        @SuppressLint("DrawAllocation") Bitmap resizedBackgroundBitmap = Bitmap.createScaledBitmap(backgroundBitmap, getWidth(), getHeight(), true);
-        canvas.drawBitmap(resizedBackgroundBitmap, 0, characterY, null);
+        Bitmap resizedBackgroundBitmap = Bitmap.createScaledBitmap(backgroundBitmap, getWidth(), getHeight(), true);
+        canvas.drawBitmap(resizedBackgroundBitmap, 0, fond1Y, null);
+
+        Bitmap resizedBackground2Bitmap = Bitmap.createScaledBitmap(background2Bitmap, getWidth(), getHeight(), true);
+        canvas.drawBitmap(resizedBackground2Bitmap, 0, fond2Y - getHeight(), null);
+
 
         Bitmap resizedCharacterBitmap = getResizedBitmap(characterBitmap, desiredWidth, desiredHeight);
-        canvas.drawBitmap(resizedCharacterBitmap, characterX, 1100, null);
+        canvas.drawBitmap(resizedCharacterBitmap, characterX, 1400, null);
+
+        Bitmap resizedFlammeBitmap = getResizedBitmap(flammeBitmap, desiredWidth-50, desiredHeight-50);
+        canvas.drawBitmap(resizedFlammeBitmap, flammeX, flammeY, null);
+        hideFlamme();
 
         // Dessiner les astéroïdes
         for (Asteroid asteroid : asteroids) {
@@ -89,10 +115,12 @@ public class TriangleView extends View {
             case MotionEvent.ACTION_MOVE:
                 float touchX = event.getX();
                 moveCharacter(touchX > (float) getWidth() / 2);
+                showFlamme();
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 isMoving = false;
+                hideFlamme();
                 break;
         }
         return true;
@@ -115,8 +143,8 @@ public class TriangleView extends View {
                             characterX -= speed;
                         }
                         characterX = Math.max(0, Math.min(characterX, getWidth() - desiredWidth));
-                        //moveBackground();
-                        //update();
+                        showFlamme();
+                        moveBackground();
                         invalidate();
                         postDelayed(this, 16);
                     }
@@ -127,12 +155,13 @@ public class TriangleView extends View {
     }
 
     private void moveBackground() {
-        final float backgroundSpeed = 50.0f;
-        characterY+= backgroundSpeed;
+        updateBackgroundPositions();
+        invalidate();
+    }
 
-        if (characterY <= -backgroundHeight) {
-            characterY = getHeight();
-        }
+    private void updateBackgroundPositions() {
+        fond1Y = (fond1Y + BACKGROUND_SPEED) % backgroundHeight;
+        fond2Y = (fond2Y + BACKGROUND_SPEED) % background2Height;
     }
 
     private void generateAsteroid(Context context) {
@@ -170,6 +199,15 @@ public class TriangleView extends View {
 
     private void update() {
         updateAsteroids(); // Met à jour la position des astéroïdes
+
+        for (Asteroid asteroid : asteroids) {
+            if (checkCollision(asteroid)) {
+                // Collision détectée, arrête le jeu
+                stopGame();
+                return;
+            }
+        }
+
         invalidate(); // Redessine la vue
     }
 
@@ -178,8 +216,9 @@ public class TriangleView extends View {
         Runnable asteroidGenerator = new Runnable() {
             @Override
             public void run() {
+                if (isGameOver == false){
                 generateAsteroid(getContext());
-                postDelayed(this, 2000); // Génère un astéroïde toutes les 1.5 secondes
+                postDelayed(this, 2000);} // Génère un astéroïde toutes les 1.5 secondes
             }
         };
 
@@ -192,12 +231,50 @@ public class TriangleView extends View {
         Runnable asteroidUpdater = new Runnable() {
             @Override
             public void run() {
-                update();
-                postDelayed(this, 10); // Met à jour les astéroïdes environ toutes les 16 millisecondes
+                if (isGameOver == false){
+                    update();
+                    postDelayed(this, 10);}
             }
         };
 
         // Lance la mise à jour des astéroïdes
         post(asteroidUpdater);
+    }
+
+    private boolean checkCollision(Asteroid asteroid) {
+        // Coordonnées du vaisseau spatial
+        float spaceshipLeft = characterX;
+        float spaceshipRight = characterX + desiredWidth;
+        float spaceshipTop = 1400;
+        float spaceshipBottom = 1400 + desiredHeight;
+
+        // Coordonnées de l'astéroïde
+        float asteroidLeft = asteroid.getX();
+        float asteroidRight = asteroid.getX() + asteroid.getWidth();
+        float asteroidTop = asteroid.getY();
+        float asteroidBottom = asteroid.getY() + asteroid.getHeight();
+
+        // Vérifie si les coordonnées du vaisseau spatial se trouvent à l'intérieur des coordonnées de l'astéroïde
+        return spaceshipLeft < asteroidRight && spaceshipRight > asteroidLeft &&
+                spaceshipTop < asteroidBottom && spaceshipBottom > asteroidTop;
+    }
+
+    private void stopGame() {
+        // Arrête la génération d'astéroïdes
+        isGameOver = true;
+        // Désactive la possibilité de déplacer le personnage
+        isMoving = false;
+    }
+
+    private void showFlamme() {
+        flammeX = characterX+25; // Positionner la flamme sur le personnage
+        flammeY = 1400 + desiredHeight-5; // Positionner la flamme juste en dessous du personnage
+        invalidate(); // Redessiner la vue pour afficher la flamme
+    }
+
+    // Cacher la flamme
+    private void hideFlamme() {
+        flammeY = getHeight(); // Faire disparaître la flamme en dehors de l'écran
+        invalidate(); // Redessiner la vue pour cacher la flamme
     }
 }
