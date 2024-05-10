@@ -21,7 +21,7 @@ public class PauseButton extends androidx.appcompat.widget.AppCompatButton {
     private void init() {
         setText("Pause");
         setOnClickListener(v -> {
-            // Handle the click event here
+            // TriangleView.isGameOver = true;
         });
     }
 }
