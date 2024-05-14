@@ -25,6 +25,10 @@
 
         <activity android:name=".TriangleActivity" />
 
+        <activity android:name=".ScoreActivity"
+            android:label="Score Activity" />
+
+
     </application>
 
 </manifest>

@@ -6,8 +6,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 
 public class TriangleView extends View {
 
@@ -18,6 +20,9 @@ public class TriangleView extends View {
     private float characterX, characterY; // Position du personnage
     private boolean isMoving; // Indique si le personnage est en mouvement
     private int backgroundHeight; // Hauteur de l'image de fond
+    private int score; // Score du joueur
+    private float characterSpeed; // Vitesse actuelle du personnage
+    private long lastFrameTime; // Temps du dernier frame (en millisecondes)
 
     public TriangleView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -31,6 +36,9 @@ public class TriangleView extends View {
         characterY = 0; // Position Y initiale du personnage
         isMoving = false; // Initialement, le personnage ne bouge pas
         backgroundHeight = backgroundBitmap.getHeight(); // Récupérer la hauteur de l'image de fond
+        score = 0;
+        // Initialisation du temps du dernier frame
+        lastFrameTime = System.currentTimeMillis();
     }
 
     @Override
@@ -48,7 +56,33 @@ public class TriangleView extends View {
 
         // Dessiner l'image du personnage à sa position actuelle
         canvas.drawBitmap(resizedCharacterBitmap, characterX, 1100, null);
+
+        // Calculer le temps écoulé depuis le dernier frame
+        long currentTime = System.currentTimeMillis();
+        float deltaTime = (currentTime - lastFrameTime) / 1000.0f; // Convertir en secondes
+
+        // Mettre à jour la vitesse du personnage en pixels par seconde
+        updateCharacterSpeed(deltaTime);
+
+        // Calculer le score en fonction de la vitesse actuelle du personnage
+        calculateScore();
+
+        // Mise à jour du temps du dernier frame
+        lastFrameTime = currentTime;
     }
+
+    /*protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        // Trouver et initialiser votre instance de TriangleView
+        TriangleView triangleView = findViewById(R.id.triangleView);
+
+        // ... Autres initialisations de votre activité ...
+
+        // Mise à jour du TextView avec le score actuel
+        updateScoreTextView(triangleView.getScore());
+    }*/
 
     // Méthode pour redimensionner une bitmap
     private Bitmap getResizedBitmap(Bitmap bitmap, int width, int height) {
@@ -133,4 +167,56 @@ public class TriangleView extends View {
             characterY = getHeight();
         }
     }
+
+    private void updateCharacterSpeed(float deltaTime) {
+        // Définir la vitesse de déplacement du personnage en pixels par seconde
+        float speed = 200.0f; // Exemple de vitesse en pixels par seconde
+
+        // Mettre à jour la position du personnage en fonction de la vitesse et du temps écoulé
+        characterY += speed * deltaTime; // Déplacement vers le bas
+
+        // Réinitialiser la position Y si nécessaire
+        if (characterY >= getHeight()) {
+            characterY = 0; // Réinitialiser en haut de l'écran
+        }
+
+        // Mettre à jour la vitesse actuelle du personnage
+        characterSpeed = speed;
+    }
+
+
+
+    private void calculateScore() {
+        // Coefficient de score en fonction de la vitesse du personnage
+        float speedCoefficient = 0.5f;
+
+        // Calculer le score en fonction de la vitesse actuelle du personnage
+        score += (int) (characterSpeed * speedCoefficient);
+
+        // Afficher ou utiliser le score dans votre application
+        Log.d("Score", "Score: " + score);
+        updateScoreTextView(score);
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    private void updateScoreTextView(int score) {
+        // Trouver le TextView par son ID
+        TextView textViewScore = findViewById(R.id.textViewScore);
+
+        // Mettre à jour le texte du TextView avec le score actuel
+        textViewScore.setText("Score: " + score);
+    }
+
+    // Supposons que vous avez une instance de TriangleView appelée triangleView
+    int currentScore = triangleView.getScore();
+
+    // Trouver le TextView par son ID
+    TextView textViewScore = findViewById(R.id.textViewScore);
+
+    // Mettre à jour le texte du TextView avec le score actuel
+    textViewScore.setText("Score: " + currentScore);
+
 }

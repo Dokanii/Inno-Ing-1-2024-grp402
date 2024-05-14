@@ -10,4 +10,6 @@ public class TriangleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(new TriangleView(this, null));
     }
+
 }
+

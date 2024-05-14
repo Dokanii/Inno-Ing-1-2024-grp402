@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:fillViewport="true">
 
+
     <LinearLayout
         android:id="@+id/Container"
         android:layout_width="match_parent"
@@ -24,5 +25,8 @@
             android:scaleType="fitXY"
             android:src="@drawable/fond" />
 
+
     </LinearLayout>
+
+
 </androidx.core.widget.NestedScrollView>
