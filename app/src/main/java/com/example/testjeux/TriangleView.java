@@ -1,122 +1,126 @@
 package com.example.testjeux;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TriangleView extends View {
 
     private Bitmap backgroundBitmap;
+    private Bitmap background2Bitmap;
     private Bitmap characterBitmap;
-    private int desiredWidth; // Largeur souhaitée de l'image
-    private int desiredHeight; // Hauteur souhaitée de l'image
-    private float characterX, characterY; // Position du personnage
-    private boolean isMoving; // Indique si le personnage est en mouvement
-    private int backgroundHeight; // Hauteur de l'image de fond
-    private int score; // Score du joueur
-    private float characterSpeed; // Vitesse actuelle du personnage
-    private long lastFrameTime; // Temps du dernier frame (en millisecondes)
+    private Bitmap flammeBitmap;
+    private int desiredWidth;
+    private int desiredHeight;
+    private float characterX, fond1Y, fond2Y;
+    private boolean isMoving;
+    private int backgroundHeight;
+    private int background2Height;
 
-    public TriangleView(Context context, AttributeSet attrs) {
+    private float flammeX, flammeY;
+
+    private boolean isGameOver = false;
+
+    private List<Asteroid> asteroids = new ArrayList<>();
+    private int frameCount = 0;
+    private int fond1Height;
+    private int fond2Height;
+
+    private static final float BACKGROUND_SPEED = 40.0f;
+
+    public TriangleView(Context context) {
+        super(context);
+        init(context);
+
+    }
+
+    public TriangleView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        // Charger l'image de fond depuis les ressources
+        init(context);
+    }
+
+    private void init(Context context) {
         backgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.fond);
-        // Charger l'image du personnage depuis les ressources
-        characterBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.b99c708025ea1ae4a3a5484907990c4e);
-        desiredWidth = 200; // Largeur souhaitée de l'image (en pixels)
-        desiredHeight = 200; // Hauteur souhaitée de l'image (en pixels)
-        characterX = 450; // Position X initiale du personnage
-        characterY = 0; // Position Y initiale du personnage
-        isMoving = false; // Initialement, le personnage ne bouge pas
-        backgroundHeight = backgroundBitmap.getHeight(); // Récupérer la hauteur de l'image de fond
-        score = 0;
-        // Initialisation du temps du dernier frame
-        lastFrameTime = System.currentTimeMillis();
+        background2Bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.fond);
+        characterBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.spaceship);
+        flammeBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.flamme);
+
+        desiredWidth = 150;
+        desiredHeight = 150;
+        characterX = 450;
+        fond1Y = 0;
+        fond2Y = 0;
+        flammeX = characterX;
+        isMoving = false;
+        backgroundHeight = backgroundBitmap.getHeight();
+        background2Height = background2Bitmap.getHeight();
+        fond1Height = backgroundHeight;
+        fond2Height = background2Height;
+        startGeneratingAsteroids();
+        startUpdatingAsteroids();
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
-        // Redimensionner l'image de fond pour qu'elle remplisse l'écran
         Bitmap resizedBackgroundBitmap = Bitmap.createScaledBitmap(backgroundBitmap, getWidth(), getHeight(), true);
+        canvas.drawBitmap(resizedBackgroundBitmap, 0, fond1Y, null);
 
-        // Dessiner l'image de fond redimensionnée avec un décalage vertical pour simuler le défilement
-        canvas.drawBitmap(resizedBackgroundBitmap, 0, characterY, null);
+        Bitmap resizedBackground2Bitmap = Bitmap.createScaledBitmap(background2Bitmap, getWidth(), getHeight(), true);
+        canvas.drawBitmap(resizedBackground2Bitmap, 0, fond2Y - getHeight(), null);
 
-        // Redimensionner l'image du personnage à la taille souhaitée
+
         Bitmap resizedCharacterBitmap = getResizedBitmap(characterBitmap, desiredWidth, desiredHeight);
+        canvas.drawBitmap(resizedCharacterBitmap, characterX, 1400, null);
 
-        // Dessiner l'image du personnage à sa position actuelle
-        canvas.drawBitmap(resizedCharacterBitmap, characterX, 1100, null);
+        Bitmap resizedFlammeBitmap = getResizedBitmap(flammeBitmap, desiredWidth-50, desiredHeight-50);
+        canvas.drawBitmap(resizedFlammeBitmap, flammeX, flammeY, null);
+        hideFlamme();
 
-        // Calculer le temps écoulé depuis le dernier frame
-        long currentTime = System.currentTimeMillis();
-        float deltaTime = (currentTime - lastFrameTime) / 1000.0f; // Convertir en secondes
-
-        // Mettre à jour la vitesse du personnage en pixels par seconde
-        updateCharacterSpeed(deltaTime);
-
-        // Calculer le score en fonction de la vitesse actuelle du personnage
-        calculateScore();
-
-        // Mise à jour du temps du dernier frame
-        lastFrameTime = currentTime;
+        // Dessiner les astéroïdes
+        for (Asteroid asteroid : asteroids) {
+            asteroid.draw(canvas);
+        }
     }
 
-    /*protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        // Trouver et initialiser votre instance de TriangleView
-        TriangleView triangleView = findViewById(R.id.triangleView);
-
-        // ... Autres initialisations de votre activité ...
-
-        // Mise à jour du TextView avec le score actuel
-        updateScoreTextView(triangleView.getScore());
-    }*/
-
-    // Méthode pour redimensionner une bitmap
     private Bitmap getResizedBitmap(Bitmap bitmap, int width, int height) {
-        // Calcul du facteur d'échelle
         float scaleWidth = ((float) width) / bitmap.getWidth();
         float scaleHeight = ((float) height) / bitmap.getHeight();
 
-        // Création d'une matrice pour le facteur d'échelle
         Matrix matrix = new Matrix();
         matrix.postScale(scaleWidth, scaleHeight);
 
-        // Application de la matrice à la bitmap
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
                 float touchX = event.getX();
-                // Vérifier si le toucher est sur le côté gauche ou droit de l'écran
-                if (touchX > getWidth() / 2) {
-                    // Toucher sur le côté droit de l'écran
-                    moveCharacter(true);  // Déplacer vers la droite
-                } else {
-                    // Toucher sur le côté gauche de l'écran
-                    moveCharacter(false); // Déplacer vers la gauche
-                }
+                moveCharacter(touchX > (float) getWidth() / 2);
+                showFlamme();
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                // Arrêter le mouvement du personnage
                 isMoving = false;
+                hideFlamme();
                 break;
         }
         return true;
@@ -125,98 +129,152 @@ public class TriangleView extends View {
     private void moveCharacter(final boolean moveRight) {
         if (!isMoving) {
             isMoving = true;
-            final float speed = 20.0f; // Vitesse du mouvement du personnage
+            final float speed = 20.0f;
 
             Runnable moveRunnable = new Runnable() {
                 @Override
                 public void run() {
+
+
                     if (isMoving) {
-                        // Mettre à jour characterX en fonction de la direction
                         if (moveRight) {
                             characterX += speed;
                         } else {
                             characterX -= speed;
                         }
-
-                        // Assurer que le personnage reste dans les limites de la vue
                         characterX = Math.max(0, Math.min(characterX, getWidth() - desiredWidth));
-
-                        // Faire défiler l'image de fond
-                        moveBackground(); // Appel à moveBackground ici
-
-                        // Redessiner la vue
+                        showFlamme();
+                        moveBackground();
                         invalidate();
-
-                        // Récursion pour continuer le mouvement
-                        postDelayed(this, 16); // environ 60 FPS
+                        postDelayed(this, 16);
                     }
                 }
             };
-
             post(moveRunnable);
         }
     }
 
     private void moveBackground() {
-        final float backgroundSpeed = 50.0f; // Vitesse du défilement de l'image de fond
-        // Mettre à jour characterY pour déplacer l'image de fond vers le haut avec une vitesse différente
-        characterY += backgroundSpeed;
+        updateBackgroundPositions();
+        invalidate();
+    }
 
-        // Si l'image de fond sort complètement de l'écran en haut, réinitialiser sa position Y
-        if (characterY <= -backgroundHeight) {
-            characterY = getHeight();
+    private void updateBackgroundPositions() {
+        fond1Y = (fond1Y + BACKGROUND_SPEED) % backgroundHeight;
+        fond2Y = (fond2Y + BACKGROUND_SPEED) % background2Height;
+    }
+
+    private void generateAsteroid(Context context) {
+        // Générer une position aléatoire sur l'axe X
+        int asteroidX = (int) (Math.random() * getWidth());
+
+        // Générer une position aléatoire sur l'axe Y (en haut de l'écran)
+        int asteroidY = 0;
+
+        // Créer un nouvel astéroïde
+        Asteroid asteroid = new Asteroid(getContext(), asteroidX, asteroidY);
+
+        // Ajouter l'astéroïde à la liste des astéroïdes
+        asteroids.add(asteroid);
+    }
+    private void updateAsteroids() {
+        // Liste temporaire pour stocker les astéroïdes à supprimer
+        List<Asteroid> asteroidsToRemove = new ArrayList<>();
+
+        // Mettre à jour la position des astéroïdes
+        for (Asteroid asteroid : asteroids) {
+            asteroid.update();
+
+            // Vérifier si l'astéroïde est sorti de l'écran
+            if (asteroid.getY() > getHeight()) {
+                // Ajouter l'astéroïde à la liste des astéroïdes à supprimer
+                asteroidsToRemove.add(asteroid);
+            }
         }
+
+        // Supprimer les astéroïdes de la liste principale
+        asteroids.removeAll(asteroidsToRemove);
+        invalidate();
     }
 
-    private void updateCharacterSpeed(float deltaTime) {
-        // Définir la vitesse de déplacement du personnage en pixels par seconde
-        float speed = 200.0f; // Exemple de vitesse en pixels par seconde
+    private void update() {
+        updateAsteroids(); // Met à jour la position des astéroïdes
 
-        // Mettre à jour la position du personnage en fonction de la vitesse et du temps écoulé
-        characterY += speed * deltaTime; // Déplacement vers le bas
-
-        // Réinitialiser la position Y si nécessaire
-        if (characterY >= getHeight()) {
-            characterY = 0; // Réinitialiser en haut de l'écran
+        for (Asteroid asteroid : asteroids) {
+            if (checkCollision(asteroid)) {
+                // Collision détectée, arrête le jeu
+                stopGame();
+                return;
+            }
         }
 
-        // Mettre à jour la vitesse actuelle du personnage
-        characterSpeed = speed;
+        invalidate(); // Redessine la vue
     }
 
+    private void startGeneratingAsteroids() {
+        // Crée une tâche périodique pour générer les astéroïdes toutes les X millisecondes
+        Runnable asteroidGenerator = new Runnable() {
+            @Override
+            public void run() {
+                if (isGameOver == false){
+                generateAsteroid(getContext());
+                postDelayed(this, 2000);} // Génère un astéroïde toutes les 1.5 secondes
+            }
+        };
 
-
-    private void calculateScore() {
-        // Coefficient de score en fonction de la vitesse du personnage
-        float speedCoefficient = 0.5f;
-
-        // Calculer le score en fonction de la vitesse actuelle du personnage
-        score += (int) (characterSpeed * speedCoefficient);
-
-        // Afficher ou utiliser le score dans votre application
-        Log.d("Score", "Score: " + score);
-        updateScoreTextView(score);
+        // Lance la génération des astéroïdes
+        post(asteroidGenerator);
     }
 
-    public int getScore() {
-        return score;
+    private void startUpdatingAsteroids() {
+        // Crée une tâche périodique pour mettre à jour les astéroïdes toutes les X millisecondes
+        Runnable asteroidUpdater = new Runnable() {
+            @Override
+            public void run() {
+                if (isGameOver == false){
+                    update();
+                    postDelayed(this, 10);}
+            }
+        };
+
+        // Lance la mise à jour des astéroïdes
+        post(asteroidUpdater);
     }
 
-    private void updateScoreTextView(int score) {
-        // Trouver le TextView par son ID
-        TextView textViewScore = findViewById(R.id.textViewScore);
+    private boolean checkCollision(Asteroid asteroid) {
+        // Coordonnées du vaisseau spatial
+        float spaceshipLeft = characterX;
+        float spaceshipRight = characterX + desiredWidth;
+        float spaceshipTop = 1400;
+        float spaceshipBottom = 1400 + desiredHeight;
 
-        // Mettre à jour le texte du TextView avec le score actuel
-        textViewScore.setText("Score: " + score);
+        // Coordonnées de l'astéroïde
+        float asteroidLeft = asteroid.getX();
+        float asteroidRight = asteroid.getX() + asteroid.getWidth();
+        float asteroidTop = asteroid.getY();
+        float asteroidBottom = asteroid.getY() + asteroid.getHeight();
+
+        // Vérifie si les coordonnées du vaisseau spatial se trouvent à l'intérieur des coordonnées de l'astéroïde
+        return spaceshipLeft < asteroidRight && spaceshipRight > asteroidLeft &&
+                spaceshipTop < asteroidBottom && spaceshipBottom > asteroidTop;
     }
 
-    // Supposons que vous avez une instance de TriangleView appelée triangleView
-    int currentScore = triangleView.getScore();
+    private void stopGame() {
+        // Arrête la génération d'astéroïdes
+        isGameOver = true;
+        // Désactive la possibilité de déplacer le personnage
+        isMoving = false;
+    }
 
-    // Trouver le TextView par son ID
-    TextView textViewScore = findViewById(R.id.textViewScore);
+    private void showFlamme() {
+        flammeX = characterX+25; // Positionner la flamme sur le personnage
+        flammeY = 1400 + desiredHeight-5; // Positionner la flamme juste en dessous du personnage
+        invalidate(); // Redessiner la vue pour afficher la flamme
+    }
 
-    // Mettre à jour le texte du TextView avec le score actuel
-    textViewScore.setText("Score: " + currentScore);
-
+    // Cacher la flamme
+    private void hideFlamme() {
+        flammeY = getHeight(); // Faire disparaître la flamme en dehors de l'écran
+        invalidate(); // Redessiner la vue pour cacher la flamme
+    }
 }
