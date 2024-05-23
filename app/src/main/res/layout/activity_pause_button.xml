@@ -15,6 +15,11 @@
     <com.example.testjeux.PauseButton
         android:id="@+id/retourButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_below="@id/labelPause"
+        android:layout_centerHorizontal="true"
+        android:text="retour"
+        android:textSize="18sp"
+        android:padding="16dp"/>
 
 </RelativeLayout>
