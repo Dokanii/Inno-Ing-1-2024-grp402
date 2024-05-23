@@ -5,19 +5,18 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-
-
-import android.graphics.Paint;
-import android.graphics.Color;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class TriangleView extends View {
@@ -26,6 +25,7 @@ public class TriangleView extends View {
     private Bitmap background2Bitmap;
     private Bitmap characterBitmap;
     private Bitmap flammeBitmap;
+    private Bitmap shieldOn;
     private int desiredWidth;
     private int desiredHeight;
     private float characterX, fond1Y, fond2Y;
@@ -37,19 +37,23 @@ public class TriangleView extends View {
 
     private boolean isGameOver = false;
 
+    private boolean power = false;
+    private int score = 0;
+
     private List<Asteroid> asteroids = new ArrayList<>();
+    private List<Shield> shields = new ArrayList<>();
     private int frameCount = 0;
     private int fond1Height;
     private int fond2Height;
+    private Bitmap shieldBitmap;
+    private float shieldX, shieldY;
+    private boolean isShieldActive = false;
 
-    private int score = 0;
-
-    private static final float BACKGROUND_SPEED = 10.0f;
+    private static final float BACKGROUND_SPEED = 40.0f;
 
     public TriangleView(Context context) {
         super(context);
         init(context);
-
     }
 
     public TriangleView(Context context, @Nullable AttributeSet attrs) {
@@ -62,6 +66,8 @@ public class TriangleView extends View {
         background2Bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.fond);
         characterBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.spaceship);
         flammeBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.flamme);
+        shieldBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.shield);
+        shieldOn = BitmapFactory.decodeResource(getResources(), R.drawable.shieldon);
 
         desiredWidth = 150;
         desiredHeight = 150;
@@ -69,6 +75,8 @@ public class TriangleView extends View {
         fond1Y = 0;
         fond2Y = 0;
         flammeX = characterX;
+        shieldX = 0;
+        shieldY = 0;
         isMoving = false;
         backgroundHeight = backgroundBitmap.getHeight();
         background2Height = background2Bitmap.getHeight();
@@ -76,6 +84,7 @@ public class TriangleView extends View {
         fond2Height = background2Height;
         startGeneratingAsteroids();
         startUpdatingAsteroids();
+        startGeneratingShield();
     }
 
     @Override
@@ -88,11 +97,10 @@ public class TriangleView extends View {
         Bitmap resizedBackground2Bitmap = Bitmap.createScaledBitmap(background2Bitmap, getWidth(), getHeight(), true);
         canvas.drawBitmap(resizedBackground2Bitmap, 0, fond2Y - getHeight(), null);
 
-
         Bitmap resizedCharacterBitmap = getResizedBitmap(characterBitmap, desiredWidth, desiredHeight);
         canvas.drawBitmap(resizedCharacterBitmap, characterX, 1400, null);
 
-        Bitmap resizedFlammeBitmap = getResizedBitmap(flammeBitmap, desiredWidth-50, desiredHeight-50);
+        Bitmap resizedFlammeBitmap = getResizedBitmap(flammeBitmap, desiredWidth - 50, desiredHeight - 50);
         canvas.drawBitmap(resizedFlammeBitmap, flammeX, flammeY, null);
         hideFlamme();
 
@@ -101,14 +109,22 @@ public class TriangleView extends View {
             asteroid.draw(canvas);
         }
 
+        // Dessiner les boucliers
+        for (Shield shield : shields) {
+            shield.draw(canvas);
+        }
+
+        if (isShieldActive) {
+            Bitmap resizedShieldOnShipBitmap = getResizedBitmap(shieldOn, desiredWidth + 100, desiredHeight + 100);
+            canvas.drawBitmap(resizedShieldOnShipBitmap, characterX - 50, 1400 - 50, null);
+        }
+
         // Afficher le score sur l'écran
         Paint scorePaint = new Paint();
         scorePaint.setTextSize(50);
         scorePaint.setColor(Color.WHITE);
         canvas.drawText("Score: " + score, 20, 50, scorePaint);
     }
-
-
 
     private Bitmap getResizedBitmap(Bitmap bitmap, int width, int height) {
         float scaleWidth = ((float) width) / bitmap.getWidth();
@@ -147,8 +163,6 @@ public class TriangleView extends View {
             Runnable moveRunnable = new Runnable() {
                 @Override
                 public void run() {
-
-
                     if (isMoving) {
                         if (moveRight) {
                             characterX += speed;
@@ -173,129 +187,180 @@ public class TriangleView extends View {
     }
 
     private void updateBackgroundPositions() {
-        // Calculate the new positions for the background images
         fond1Y = (fond1Y + BACKGROUND_SPEED) % backgroundHeight;
-        fond2Y = (fond2Y + BACKGROUND_SPEED) % backgroundHeight;
+        fond2Y = (fond2Y + BACKGROUND_SPEED) % background2Height;
     }
+
     private void generateAsteroid(Context context) {
-        // Générer une position aléatoire sur l'axe X
         int asteroidX = (int) (Math.random() * getWidth());
-
-        // Générer une position aléatoire sur l'axe Y (en haut de l'écran)
         int asteroidY = 0;
-
-        // Créer un nouvel astéroïde
         Asteroid asteroid = new Asteroid(getContext(), asteroidX, asteroidY);
-
-        // Ajouter l'astéroïde à la liste des astéroïdes
         asteroids.add(asteroid);
     }
+
     private void updateAsteroids() {
-        // Liste temporaire pour stocker les astéroïdes à supprimer
         List<Asteroid> asteroidsToRemove = new ArrayList<>();
 
-        // Mettre à jour la position des astéroïdes
         for (Asteroid asteroid : asteroids) {
             asteroid.update();
-
-            // Vérifier si l'astéroïde est sorti de l'écran
             if (asteroid.getY() > getHeight()) {
-                // Ajouter l'astéroïde à la liste des astéroïdes à supprimer
                 asteroidsToRemove.add(asteroid);
             }
         }
 
-        // Supprimer les astéroïdes de la liste principale
         asteroids.removeAll(asteroidsToRemove);
         invalidate();
     }
 
-    private void update() {
-        updateAsteroids(); // Met à jour la position des astéroïdes
+    private void updateShields() {
+        List<Shield> shieldsToRemove = new ArrayList<>();
 
-        boolean collisionDetected = false;
-
-        for (Asteroid asteroid : asteroids) {
-            if (checkCollision(asteroid)) {
-                // Collision détectée, arrête le jeu
-                stopGame();
-                collisionDetected = true;
-                break;
+        for (Shield shield : shields) {
+            shield.update();
+            if (shield.getY() > getHeight()) {
+                shieldsToRemove.add(shield);
             }
         }
 
-        // Si aucune collision n'est détectée, augmenter le score
-        if (!collisionDetected) {
-            score += 1;
+        shields.removeAll(shieldsToRemove);
+        invalidate();
+    }
+
+    private void update() {
+        boolean collisionDetected = false;
+        updateAsteroids();
+        updateShields();
+        frameCount++;
+        if (frameCount % (60 * 10) == 0) {
+            generateShield();
         }
 
-        invalidate(); // Redessine la vue
+        Iterator<Asteroid> asteroidIterator = asteroids.iterator();
+        while (asteroidIterator.hasNext()) {
+            Asteroid asteroid = asteroidIterator.next();
+            if (checkCollision(asteroid)) {
+                if (isShieldActive) {
+                    isShieldActive = false;
+                    asteroidIterator.remove();
+                    power = false;
+                } else {
+                    stopGame();
+                    collisionDetected = true;
+                    return;
+                }
+            }
+            if (!collisionDetected) {
+                score += 1;
+            }
+        }
+
+        Iterator<Shield> shieldIterator = shields.iterator();
+        while (shieldIterator.hasNext()) {
+            Shield shield = shieldIterator.next();
+            if (checkShieldCollision(shield)) {
+                shieldIterator.remove();
+            }
+        }
+
+        invalidate();
     }
 
     private void startGeneratingAsteroids() {
-        // Crée une tâche périodique pour générer les astéroïdes toutes les X millisecondes
         Runnable asteroidGenerator = new Runnable() {
             @Override
             public void run() {
-                if (isGameOver == false){
-                generateAsteroid(getContext());
-                postDelayed(this, 2000);} // Génère un astéroïde toutes les 1.5 secondes
+                if (!isGameOver) {
+                    generateAsteroid(getContext());
+                    postDelayed(this, 2000);
+                }
             }
         };
-
-        // Lance la génération des astéroïdes
         post(asteroidGenerator);
     }
 
     private void startUpdatingAsteroids() {
-        // Crée une tâche périodique pour mettre à jour les astéroïdes toutes les X millisecondes
         Runnable asteroidUpdater = new Runnable() {
             @Override
             public void run() {
-                if (isGameOver == false){
+                if (!isGameOver) {
                     update();
-                    postDelayed(this, 10);}
+                    postDelayed(this, 10);
+                }
             }
         };
-
-        // Lance la mise à jour des astéroïdes
         post(asteroidUpdater);
     }
 
     private boolean checkCollision(Asteroid asteroid) {
-        // Coordonnées du vaisseau spatial
         float spaceshipLeft = characterX;
         float spaceshipRight = characterX + desiredWidth;
         float spaceshipTop = 1400;
         float spaceshipBottom = 1400 + desiredHeight;
 
-        // Coordonnées de l'astéroïde
         float asteroidLeft = asteroid.getX();
         float asteroidRight = asteroid.getX() + asteroid.getWidth();
         float asteroidTop = asteroid.getY();
         float asteroidBottom = asteroid.getY() + asteroid.getHeight();
 
-        // Vérifie si les coordonnées du vaisseau spatial se trouvent à l'intérieur des coordonnées de l'astéroïde
         return spaceshipLeft < asteroidRight && spaceshipRight > asteroidLeft &&
                 spaceshipTop < asteroidBottom && spaceshipBottom > asteroidTop;
     }
 
+    private boolean checkShieldCollision(Shield shield) {
+        float spaceshipLeft = characterX;
+        float spaceshipRight = characterX + desiredWidth;
+        float spaceshipTop = 1400;
+        float spaceshipBottom = 1400 + desiredHeight;
+
+        float shieldLeft = shield.getX();
+        float shieldRight = shield.getX() + shield.getWidth();
+        float shieldTop = shield.getY();
+        float shieldBottom = shield.getY() + shield.getHeight();
+
+        if (shieldRight > spaceshipLeft && shieldLeft < spaceshipRight &&
+                shieldBottom > spaceshipTop && shieldTop < spaceshipBottom) {
+            isShieldActive = true;
+            power = true;
+            return true;
+        }
+        return false;
+    }
+
     private void stopGame() {
-        // Arrête la génération d'astéroïdes
         isGameOver = true;
-        // Désactive la possibilité de déplacer le personnage
         isMoving = false;
     }
 
     private void showFlamme() {
-        flammeX = characterX+25; // Positionner la flamme sur le personnage
-        flammeY = 1400 + desiredHeight-5; // Positionner la flamme juste en dessous du personnage
-        invalidate(); // Redessiner la vue pour afficher la flamme
+        flammeX = characterX + 25;
+        flammeY = 1400 + desiredWidth - 5;
+        invalidate();
     }
 
-    // Cacher la flamme
     private void hideFlamme() {
-        flammeY = getHeight(); // Faire disparaître la flamme en dehors de l'écran
-        invalidate(); // Redessiner la vue pour cacher la flamme
+        flammeY = getHeight();
+        invalidate();
+    }
+
+    private void generateShield() {
+        int shieldX = (int) (Math.random() * getWidth());
+        int shieldY = 0;
+        Bitmap resizedShieldBitmap = getResizedBitmap(shieldBitmap, 150, 150);
+        Shield shield = new Shield(getContext(), shieldX, shieldY, resizedShieldBitmap);
+        shields.add(shield);
+    }
+
+    private void startGeneratingShield() {
+        Runnable shieldGenerator = new Runnable() {
+            @Override
+            public void run() {
+                if (!isGameOver) {
+                    if (power == false) {
+                        generateShield();
+                        postDelayed(this, 10000);}
+                }
+            }
+        };
+        post(shieldGenerator);
     }
 }
