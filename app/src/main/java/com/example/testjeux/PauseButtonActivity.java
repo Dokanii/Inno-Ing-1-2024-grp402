@@ -3,6 +3,8 @@ package com.example.testjeux;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.Objects;
@@ -23,5 +25,19 @@ public class PauseButtonActivity extends AppCompatActivity {
             finish();
         });
 
+        // Find the "Recommencer" button in the layout
+        Button buttonRecommencer = findViewById(R.id.button_recommencer);
+
+        // Set an OnClickListener for the "Recommencer" button
+        buttonRecommencer.setOnClickListener(v -> {
+            // Create a new Intent to start TriangleActivity
+            Intent intent = new Intent(PauseButtonActivity.this, TriangleActivity.class);
+
+            // Start the new Intent
+            startActivity(intent);
+        });
+
     }
+
+
 }

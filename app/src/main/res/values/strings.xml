@@ -2,4 +2,5 @@
     <string name="app_name">TEst jeux</string>
     <string name="l_application_est_en_pause">L\'application est en pause</string>
     <string name="jouer">Jouer</string>
+    <string name="recommencer">Recommencer</string>
 </resources>
