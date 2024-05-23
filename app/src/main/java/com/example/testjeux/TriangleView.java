@@ -44,7 +44,7 @@ public class TriangleView extends View {
 
     private int score = 0;
 
-    private static final float BACKGROUND_SPEED = 40.0f;
+    private static final float BACKGROUND_SPEED = 10.0f;
 
     public TriangleView(Context context) {
         super(context);
@@ -173,10 +173,10 @@ public class TriangleView extends View {
     }
 
     private void updateBackgroundPositions() {
+        // Calculate the new positions for the background images
         fond1Y = (fond1Y + BACKGROUND_SPEED) % backgroundHeight;
-        fond2Y = (fond2Y + BACKGROUND_SPEED) % background2Height;
+        fond2Y = (fond2Y + BACKGROUND_SPEED) % backgroundHeight;
     }
-
     private void generateAsteroid(Context context) {
         // Générer une position aléatoire sur l'axe X
         int asteroidX = (int) (Math.random() * getWidth());
