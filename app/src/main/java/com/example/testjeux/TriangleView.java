@@ -10,6 +10,10 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+
+import android.graphics.Paint;
+import android.graphics.Color;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -37,6 +41,8 @@ public class TriangleView extends View {
     private int frameCount = 0;
     private int fond1Height;
     private int fond2Height;
+
+    private int score = 0;
 
     private static final float BACKGROUND_SPEED = 40.0f;
 
@@ -94,7 +100,14 @@ public class TriangleView extends View {
         for (Asteroid asteroid : asteroids) {
             asteroid.draw(canvas);
         }
+
+        // Afficher le score sur l'écran
+        Paint scorePaint = new Paint();
+        scorePaint.setTextSize(50);
+        scorePaint.setColor(Color.WHITE);
+        canvas.drawText("Score: " + score, 20, 50, scorePaint);
     }
+
 
 
     private Bitmap getResizedBitmap(Bitmap bitmap, int width, int height) {
@@ -200,12 +213,20 @@ public class TriangleView extends View {
     private void update() {
         updateAsteroids(); // Met à jour la position des astéroïdes
 
+        boolean collisionDetected = false;
+
         for (Asteroid asteroid : asteroids) {
             if (checkCollision(asteroid)) {
                 // Collision détectée, arrête le jeu
                 stopGame();
-                return;
+                collisionDetected = true;
+                break;
             }
+        }
+
+        // Si aucune collision n'est détectée, augmenter le score
+        if (!collisionDetected) {
+            score += 1;
         }
 
         invalidate(); // Redessine la vue
