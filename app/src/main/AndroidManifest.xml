@@ -23,8 +23,14 @@
             </intent-filter>
         </activity>
 
+        <!-- Déclaration de l'activité de jeu -->
         <activity android:name=".TriangleActivity" />
-        <activity android:name=".PauseButtonActivity" />
-    </application>
 
+        <!-- Déclaration de l'activité du bouton Pause -->
+        <activity android:name=".PauseButtonActivity" />
+
+        <!-- Déclaration de l'activité Game Over -->
+        <activity android:name=".GameOverActivity" />
+
+    </application>
 </manifest>

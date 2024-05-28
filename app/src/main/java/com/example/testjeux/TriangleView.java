@@ -2,6 +2,7 @@ package com.example.testjeux;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -104,12 +105,10 @@ public class TriangleView extends View {
         canvas.drawBitmap(resizedFlammeBitmap, flammeX, flammeY, null);
         hideFlamme();
 
-        // Dessiner les astéroïdes
         for (Asteroid asteroid : asteroids) {
             asteroid.draw(canvas);
         }
 
-        // Dessiner les boucliers
         for (Shield shield : shields) {
             shield.draw(canvas);
         }
@@ -119,7 +118,6 @@ public class TriangleView extends View {
             canvas.drawBitmap(resizedShieldOnShipBitmap, characterX - 50, 1400 - 50, null);
         }
 
-        // Afficher le score sur l'écran
         Paint scorePaint = new Paint();
         scorePaint.setTextSize(50);
         scorePaint.setColor(Color.WHITE);
@@ -329,6 +327,12 @@ public class TriangleView extends View {
     private void stopGame() {
         isGameOver = true;
         isMoving = false;
+
+        // Start GameOverActivity
+        Context context = getContext();
+        Intent intent = new Intent(context, GameOverActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        context.startActivity(intent);
     }
 
     private void showFlamme() {
