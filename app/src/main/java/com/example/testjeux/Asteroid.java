@@ -31,7 +31,7 @@ public class Asteroid {
         desiredWidth = taille;
         desiredHeight = taille*2;
         //this.speed = (float) (Math.random() * 5 + 1);
-        this.speed = 15;
+        this.speed = 17;
         this.bitmap = getResizedAsteroidBitmap(bitmap, desiredWidth, desiredHeight);
     }
 

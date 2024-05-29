@@ -51,8 +51,8 @@ public class TriangleView extends View {
     private float shieldX, shieldY;
     private boolean isShieldActive = false;
 
-    private static final float BACKGROUND_SPEED = 4.0f;
-    private static final int INITIAL_ASTEROID_GENERATION_DELAY = 2000; // Délai initial de génération (en millisecondes)
+    private static final float BACKGROUND_SPEED = 6.0f;
+    private static final int INITIAL_ASTEROID_GENERATION_DELAY = 1600; // Délai initial de génération (en millisecondes)
     private int asteroidGenerationDelay = INITIAL_ASTEROID_GENERATION_DELAY;
 
     public TriangleView(Context context) {
@@ -164,7 +164,7 @@ public class TriangleView extends View {
     private void moveCharacter(final boolean moveRight) {
         if (!isMoving) {
             isMoving = true;
-            final float speed = 20.0f;
+            final float speed = 35.0f;
 
             Runnable moveRunnable = new Runnable() {
                 @Override
@@ -268,6 +268,7 @@ public class TriangleView extends View {
         Iterator<Asteroid> asteroidIterator = asteroids.iterator();
         while (asteroidIterator.hasNext()) {
             Asteroid asteroid = asteroidIterator.next();
+            asteroid.update();
             if (checkCollision(asteroid)) {
                 if (isShieldActive) {
                     isShieldActive = false;
@@ -287,6 +288,7 @@ public class TriangleView extends View {
         Iterator<Shield> shieldIterator = shields.iterator();
         while (shieldIterator.hasNext()) {
             Shield shield = shieldIterator.next();
+            shield.update();
             if (checkShieldCollision(shield)) {
                 shieldIterator.remove();
             }
