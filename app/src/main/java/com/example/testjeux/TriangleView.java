@@ -12,6 +12,7 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.os.Handler;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -50,7 +51,7 @@ public class TriangleView extends View {
     private float shieldX, shieldY;
     private boolean isShieldActive = false;
 
-    private static final float BACKGROUND_SPEED = 40.0f;
+    private static final float BACKGROUND_SPEED = 4.0f;
 
     public TriangleView(Context context) {
         super(context);
@@ -103,7 +104,7 @@ public class TriangleView extends View {
 
         Bitmap resizedFlammeBitmap = getResizedBitmap(flammeBitmap, desiredWidth - 50, desiredHeight - 50);
         canvas.drawBitmap(resizedFlammeBitmap, flammeX, flammeY, null);
-        hideFlamme();
+
 
         for (Asteroid asteroid : asteroids) {
             asteroid.draw(canvas);
@@ -119,9 +120,9 @@ public class TriangleView extends View {
         }
 
         Paint scorePaint = new Paint();
-        scorePaint.setTextSize(50);
+        scorePaint.setTextSize(60);
         scorePaint.setColor(Color.WHITE);
-        canvas.drawText("Score: " + score, 20, 50, scorePaint);
+        canvas.drawText("Score: " + score, 33, 50, scorePaint);
     }
 
     private Bitmap getResizedBitmap(Bitmap bitmap, int width, int height) {
@@ -136,13 +137,17 @@ public class TriangleView extends View {
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
+
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_MOVE:
                 float touchX = event.getX();
                 moveCharacter(touchX > (float) getWidth() / 2);
                 showFlamme();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                touchX = event.getX();
+                moveCharacter(touchX > (float) getWidth() / 2);
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -152,6 +157,7 @@ public class TriangleView extends View {
         }
         return true;
     }
+
 
     private void moveCharacter(final boolean moveRight) {
         if (!isMoving) {
@@ -179,14 +185,38 @@ public class TriangleView extends View {
         }
     }
 
+
+
     private void moveBackground() {
         updateBackgroundPositions();
         invalidate();
     }
 
+    private Handler backgroundHandler = new Handler();
+    private Runnable backgroundUpdater = new Runnable() {
+        @Override
+        public void run() {
+            updateBackgroundPositions();
+            backgroundHandler.postDelayed(this, 10); // Update every 10 milliseconds
+        }
+    };
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        backgroundHandler.post(backgroundUpdater);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        backgroundHandler.removeCallbacks(backgroundUpdater);
+    }
+
     private void updateBackgroundPositions() {
         fond1Y = (fond1Y + BACKGROUND_SPEED) % backgroundHeight;
         fond2Y = (fond2Y + BACKGROUND_SPEED) % background2Height;
+        invalidate();
     }
 
     private void generateAsteroid(Context context) {
@@ -345,6 +375,7 @@ public class TriangleView extends View {
         flammeY = getHeight();
         invalidate();
     }
+
 
     private void generateShield() {
         int shieldX = (int) (Math.random() * getWidth());
