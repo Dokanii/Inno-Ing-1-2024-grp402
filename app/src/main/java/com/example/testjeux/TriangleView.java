@@ -137,21 +137,27 @@ public class TriangleView extends View {
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
+
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_MOVE:
                 float touchX = event.getX();
                 moveCharacter(touchX > (float) getWidth() / 2);
                 showFlamme();
                 break;
+            case MotionEvent.ACTION_MOVE:
+                touchX = event.getX();
+                moveCharacter(touchX > (float) getWidth() / 2);
+                break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 isMoving = false;
+                hideFlamme();
                 break;
         }
         return true;
     }
+
 
     private void moveCharacter(final boolean moveRight) {
         if (!isMoving) {
