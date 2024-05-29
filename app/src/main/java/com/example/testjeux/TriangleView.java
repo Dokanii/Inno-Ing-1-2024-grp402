@@ -299,7 +299,7 @@ public class TriangleView extends View {
             public void run() {
                 if (!isGameOver) {
                     generateAsteroid(getContext());
-                    postDelayed(this, 2000);
+                    postDelayed(this, 800);
                 }
             }
         };
