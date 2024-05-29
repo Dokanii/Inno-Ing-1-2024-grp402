@@ -34,4 +34,12 @@
         android:textSize="18sp"
         android:padding="16dp"/>
 
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleX="2.1"
+        android:scaleY="2.1"
+        app:srcCompat="@drawable/fond2" />
+
 </RelativeLayout>
