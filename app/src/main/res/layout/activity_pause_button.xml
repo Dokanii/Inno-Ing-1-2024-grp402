@@ -17,9 +17,11 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/labelPause"
         android:layout_centerHorizontal="true"
+        android:foreground="@drawable/pause"
+        android:padding="16dp"
+        android:scaleX="1.4"
         android:text="retour"
-        android:textSize="18sp"
-        android:padding="16dp"/>
+        android:textSize="18sp" />
 
 
     <Button
