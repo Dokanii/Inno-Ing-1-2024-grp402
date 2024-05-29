@@ -27,11 +27,11 @@ public class Asteroid {
         bitmap= BitmapFactory.decodeResource(context.getResources(), R.drawable.asteroid2);
         this.x = x;
         this.y = y;
-        taille = (int) (Math.random() * (200 - 100 + 1) + 100);
+        taille = (int) (Math.random() * (250 - 100 + 1) + 100);
         desiredWidth = taille;
         desiredHeight = taille*2;
         //this.speed = (float) (Math.random() * 5 + 1);
-        this.speed = 30;
+        this.speed = 15;
         this.bitmap = getResizedAsteroidBitmap(bitmap, desiredWidth, desiredHeight);
     }
 

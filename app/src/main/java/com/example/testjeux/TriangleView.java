@@ -52,6 +52,8 @@ public class TriangleView extends View {
     private boolean isShieldActive = false;
 
     private static final float BACKGROUND_SPEED = 4.0f;
+    private static final int INITIAL_ASTEROID_GENERATION_DELAY = 2000; // Délai initial de génération (en millisecondes)
+    private int asteroidGenerationDelay = INITIAL_ASTEROID_GENERATION_DELAY;
 
     public TriangleView(Context context) {
         super(context);
@@ -299,7 +301,11 @@ public class TriangleView extends View {
             public void run() {
                 if (!isGameOver) {
                     generateAsteroid(getContext());
-                    postDelayed(this, 2000);
+                    // Diminuer le délai de génération à chaque nouvelle génération
+                    asteroidGenerationDelay -= 25; // Réduire le délai de 100 millisecondes à chaque nouvelle génération
+                    // Limiter le délai minimal de génération
+                    asteroidGenerationDelay = Math.max(500, asteroidGenerationDelay); // Limiter à 1000 millisecondes (1 seconde) minimum
+                    postDelayed(this, asteroidGenerationDelay);
                 }
             }
         };
@@ -392,7 +398,7 @@ public class TriangleView extends View {
                 if (!isGameOver) {
                     if (power == false) {
                         generateShield();
-                        postDelayed(this, 10000);}
+                        postDelayed(this, 20000);}
                 }
             }
         };
