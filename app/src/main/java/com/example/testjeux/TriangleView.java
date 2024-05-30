@@ -1,7 +1,9 @@
 package com.example.testjeux;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -106,6 +108,7 @@ public class TriangleView extends View {
 
         Bitmap resizedFlammeBitmap = getResizedBitmap(flammeBitmap, desiredWidth - 50, desiredHeight - 50);
         canvas.drawBitmap(resizedFlammeBitmap, flammeX, flammeY, null);
+        hideFlamme();
 
 
         for (Asteroid asteroid : asteroids) {
@@ -370,6 +373,23 @@ public class TriangleView extends View {
         Context context = getContext();
         Intent intent = new Intent(context, GameOverActivity.class);
         context.startActivity(intent);
+
+        // Finish the current activity to remove the current layout
+        Activity activity = getActivity();
+        if (activity != null) {
+            activity.finish();
+        }
+    }
+
+    private Activity getActivity() {
+        Context context = getContext();
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return (Activity) context;
+            }
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        return null;
     }
 
     private void showFlamme() {
