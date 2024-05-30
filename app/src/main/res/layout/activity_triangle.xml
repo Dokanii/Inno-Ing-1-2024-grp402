@@ -7,6 +7,7 @@
     android:orientation="vertical"
     android:scaleType="fitXY">
 
+    <!--
     <com.example.testjeux.PauseButton
         android:id="@+id/pauseButton"
         android:layout_width="wrap_content"
@@ -17,6 +18,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="280dp" />
+-->
 
     <com.example.testjeux.TriangleView
         android:id="@+id/triangleView"
