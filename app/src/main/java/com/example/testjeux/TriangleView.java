@@ -54,7 +54,7 @@ public class TriangleView extends View {
     private boolean isShieldActive = false;
 
     private static final float BACKGROUND_SPEED = 6.0f;
-    private static final int INITIAL_ASTEROID_GENERATION_DELAY = 1600; // Délai initial de génération (en millisecondes)
+    private static final int INITIAL_ASTEROID_GENERATION_DELAY = 1600; // Délai initial de génération des astérooïdes
     private int asteroidGenerationDelay = INITIAL_ASTEROID_GENERATION_DELAY;
 
     public TriangleView(Context context) {
@@ -202,7 +202,7 @@ public class TriangleView extends View {
         @Override
         public void run() {
             updateBackgroundPositions();
-            backgroundHandler.postDelayed(this, 10); // Update every 10 milliseconds
+            backgroundHandler.postDelayed(this, 10); // Update toutes les 10 millisecondes
         }
     };
 
@@ -374,7 +374,7 @@ public class TriangleView extends View {
         Intent intent = new Intent(context, GameOverActivity.class);
         context.startActivity(intent);
 
-        // Finish the current activity to remove the current layout
+        // Terminer l'activité en cours
         Activity activity = getActivity();
         if (activity != null) {
             activity.finish();

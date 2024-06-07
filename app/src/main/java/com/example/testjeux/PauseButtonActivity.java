@@ -1,4 +1,3 @@
-// PauseButtonActivity.java
 package com.example.testjeux;
 
 import android.content.Intent;
@@ -25,15 +24,15 @@ public class PauseButtonActivity extends AppCompatActivity {
             finish();
         });
 
-        // Find the "Recommencer" button in the layout
+
         Button buttonRecommencer = findViewById(R.id.button_recommencer);
 
-        // Set an OnClickListener for the "Recommencer" button
+        //OnClickListener pour le boutton "Recommencer"
         buttonRecommencer.setOnClickListener(v -> {
-            // Create a new Intent to start TriangleActivity
+            // Créer une nouvelle Intent pour démarrer l'activité TriangleActivity
             Intent intent = new Intent(PauseButtonActivity.this, TriangleActivity.class);
 
-            // Start the new Intent
+            // Start new Intent
             startActivity(intent);
         });
 

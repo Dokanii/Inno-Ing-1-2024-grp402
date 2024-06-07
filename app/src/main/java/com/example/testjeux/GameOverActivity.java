@@ -23,7 +23,7 @@ public class GameOverActivity extends AppCompatActivity {
         restartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Restart the game
+                // Restart la partie
                 Intent intent = new Intent(GameOverActivity.this, TriangleActivity.class);
                 startActivity(intent);
                 finish();
