@@ -18,14 +18,14 @@ public class TriangleActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).hide();
 
         // Trouvez le bouton dans la mise en page de l'activité
-        // Button button = findViewById(R.id.pauseButton);
+        Button button = findViewById(R.id.pauseButton);
 
         // Définition d'un écouteur d'événements pour le bouton
-        //button.setOnClickListener(v -> {
+        button.setOnClickListener(v -> {
             // Lorsque le bouton est cliqué, lancez l'activité PauseButtonActivity
-            //Intent intent = new Intent(TriangleActivity.this, PauseButtonActivity.class);
-            //startActivity(intent);
-        //});
+            Intent intent = new Intent(TriangleActivity.this, PauseButtonActivity.class);
+            startActivity(intent);
+        });
     }
 
 }
