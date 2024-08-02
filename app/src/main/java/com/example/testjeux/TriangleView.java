@@ -226,7 +226,7 @@ public class TriangleView extends View {
 
     private void generateAsteroid(Context context) {
         int asteroidX = (int) (Math.random() * getWidth());
-        int asteroidY = 0;
+        int asteroidY = -400;
         Asteroid asteroid = new Asteroid(getContext(), asteroidX, asteroidY);
         asteroids.add(asteroid);
     }
