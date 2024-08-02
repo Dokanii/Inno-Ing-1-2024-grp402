@@ -22,6 +22,7 @@ public class PauseButtonActivity extends AppCompatActivity {
 
         button.setOnClickListener(v -> {
             finish();
+            TriangleActivity.resetPauseButtonState();
         });
 
 

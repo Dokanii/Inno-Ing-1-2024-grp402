@@ -227,8 +227,10 @@ public class TriangleView extends View {
     private void generateAsteroid(Context context) {
         int asteroidX = (int) (Math.random() * getWidth());
         int asteroidY = -400;
-        Asteroid asteroid = new Asteroid(getContext(), asteroidX, asteroidY);
-        asteroids.add(asteroid);
+        if (!TriangleActivity.getPauseButtonState()){
+            Asteroid asteroid = new Asteroid(getContext(), asteroidX, asteroidY);
+            asteroids.add(asteroid);
+        }
     }
 
     private void updateAsteroids() {
@@ -261,8 +263,10 @@ public class TriangleView extends View {
 
     private void update() {
         boolean collisionDetected = false;
-        updateAsteroids();
-        updateShields();
+        if (!TriangleActivity.getPauseButtonState()){
+            updateAsteroids();
+            updateShields();
+        }
         frameCount++;
         if (frameCount % (60 * 10) == 0) {
             generateShield();
@@ -408,8 +412,10 @@ public class TriangleView extends View {
         int shieldX = (int) (Math.random() * getWidth());
         int shieldY = 0;
         Bitmap resizedShieldBitmap = getResizedBitmap(shieldBitmap, 150, 150);
-        Shield shield = new Shield(getContext(), shieldX, shieldY, resizedShieldBitmap);
-        shields.add(shield);
+        if (!TriangleActivity.getPauseButtonState()){
+            Shield shield = new Shield(getContext(), shieldX, shieldY, resizedShieldBitmap);
+            shields.add(shield);
+        }
     }
 
     private void startGeneratingShield() {

@@ -47,17 +47,31 @@ public class Asteroid {
 
     // Méthode de mise à jour de l'astéroïde
     public void update() {
-        y += speed;
+        if (!TriangleActivity.getPauseButtonState()){
+            y += speed;
+        }
     }
 
     // Méthode de dessin de l'astéroïde
     public void draw(Canvas canvas) {
         canvas.drawBitmap(bitmap, x, y, null);
     }
-    public float getY() {return y;}
-    public float getX() {return x;}
-    public float getWidth() {return desiredWidth;}
-    public float getHeight() {return desiredHeight;}
+
+    public float getY() {
+        return y;
+    }
+
+    public float getX() {
+        return x;
+    }
+
+    public float getWidth() {
+        return desiredWidth;
+    }
+
+    public float getHeight() {
+        return desiredHeight;
+    }
 
 
 

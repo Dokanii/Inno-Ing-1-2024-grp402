@@ -9,6 +9,7 @@ import java.util.Objects;
 
 public class TriangleActivity extends AppCompatActivity {
 
+    private static boolean PauseButtonState = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,7 +26,16 @@ public class TriangleActivity extends AppCompatActivity {
             // Lorsque le bouton est cliqué, lancez l'activité PauseButtonActivity
             Intent intent = new Intent(TriangleActivity.this, PauseButtonActivity.class);
             startActivity(intent);
+            PauseButtonState = true;
         });
+    }
+
+    public static boolean getPauseButtonState () {
+        return PauseButtonState;
+    }
+
+    public static void resetPauseButtonState() {
+        PauseButtonState = false;
     }
 
 }

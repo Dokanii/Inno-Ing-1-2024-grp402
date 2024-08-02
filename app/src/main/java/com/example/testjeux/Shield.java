@@ -20,7 +20,9 @@ public class Shield {
     }
 
     public void update() {
-        y += SPEED;
+        if (!TriangleActivity.getPauseButtonState()){
+            y += SPEED;
+        }
     }
 
     public void draw(Canvas canvas) {
