@@ -1,8 +1,6 @@
 package com.example.testjeux;
 
 import android.content.Intent;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,8 +8,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
-
-    private MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,17 +26,14 @@ public class MainActivity extends AppCompatActivity {
 
         Objects.requireNonNull(getSupportActionBar()).hide();
 
-        // Initialize the MediaPlayer with the background music
-        Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.duelo_maestro);
-        mediaPlayer = MediaPlayer.create(this, uri);
-        mediaPlayer.setLooping(true); // Set the music to loop
-        mediaPlayer.start(); // Start playing the music
+        // Start the background music
+        MusicManager.startMusic(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mediaPlayer.stop();
-        mediaPlayer.release();
+        // Stop the background music when the activity is destroyed
+        MusicManager.stopMusic();
     }
 }

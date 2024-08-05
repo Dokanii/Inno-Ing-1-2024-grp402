@@ -3,4 +3,5 @@
     <string name="l_application_est_en_pause">L\'application est en pause</string>
     <string name="jouer">Jouer</string>
     <string name="recommencer">restart</string>
+    <string name="menu">Menu</string>
 </resources>

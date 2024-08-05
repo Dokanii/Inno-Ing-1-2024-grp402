@@ -17,27 +17,31 @@ public class PauseButtonActivity extends AppCompatActivity {
 
         Objects.requireNonNull(getSupportActionBar()).hide();
 
-        PauseButton button = findViewById(R.id.retourButton);
-        button.setText("Retour");
+        Button buttonRetour = findViewById(R.id.retourButton);
+        buttonRetour.setText("Retour");
 
-        button.setOnClickListener(v -> {
-            finish();
+        buttonRetour.setOnClickListener(v -> {
             TriangleActivity.resetPauseButtonState();
+            setResult(RESULT_FIRST_USER);  // Custom result code for resuming the game
+            finish();
         });
-
 
         Button buttonRecommencer = findViewById(R.id.button_recommencer);
 
-        //OnClickListener pour le boutton "Recommencer"
         buttonRecommencer.setOnClickListener(v -> {
-            // Créer une nouvelle Intent pour démarrer l'activité TriangleActivity
-            Intent intent = new Intent(PauseButtonActivity.this, TriangleActivity.class);
-
-            // Start new Intent
-            startActivity(intent);
+            TriangleActivity.resetPauseButtonState();
+            Intent intent = new Intent();
+            setResult(RESULT_OK, intent);  // Signal that we want to restart
+            finish();  // Close this activity
         });
 
+        Button buttonRetourMenu = findViewById(R.id.button_retourMenu);
+
+        buttonRetourMenu.setOnClickListener(v -> {
+            TriangleActivity.resetPauseButtonState();
+            Intent intent = new Intent();
+            setResult(RESULT_CANCELED, intent);  // Signal that we want to go back to the menu
+            finish();  // Close this activity
+        });
     }
-
-
 }

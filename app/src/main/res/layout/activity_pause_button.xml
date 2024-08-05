@@ -1,5 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white">
@@ -15,7 +16,7 @@
         android:id="@+id/retourButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/labelPause"
+        android:layout_above="@id/button_recommencer"
         android:layout_centerHorizontal="true"
         android:foreground="@drawable/pause"
         android:padding="16dp"
@@ -28,11 +29,22 @@
         android:id="@+id/button_recommencer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/retourButton"
+        android:layout_centerInParent="true"
         android:layout_centerHorizontal="true"
         android:text="@string/recommencer"
         android:textSize="18sp"
         android:padding="16dp"/>
+
+    <Button
+        android:id="@+id/button_retourMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/button_recommencer"
+        android:layout_centerHorizontal="true"
+        android:text="@string/menu"
+        android:textSize="18sp"
+        android:padding="16dp"
+        tools:ignore="UnknownId" />
 
     <ImageView
         android:id="@+id/imageView2"
