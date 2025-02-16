@@ -370,7 +370,7 @@ public class TriangleView extends View {
     }
 
     private void stopGame() {
-        isGameOver = true;
+        isGameOver = true;  
         isMoving = false;
 
         // Start GameOverActivity
