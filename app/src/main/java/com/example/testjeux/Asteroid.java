@@ -20,6 +20,8 @@ public class Asteroid {
 
 
 
+
+
     // Constructeur
 
 
@@ -72,6 +74,11 @@ public class Asteroid {
     public float getHeight() {
         return desiredHeight;
     }
+
+    public Bitmap getBitmap() {
+        return bitmap;
+    }
+
 
 
 

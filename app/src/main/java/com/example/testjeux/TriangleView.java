@@ -335,39 +335,66 @@ public class TriangleView extends View {
     }
 
     private boolean checkCollision(Asteroid asteroid) {
-        float spaceshipLeft = characterX;
-        float spaceshipRight = characterX + desiredWidth;
-        float spaceshipTop = 1400;
-        float spaceshipBottom = 1400 + desiredHeight;
+        Bitmap spaceshipBitmap = getResizedBitmap(characterBitmap, desiredWidth, desiredHeight);
+        Bitmap asteroidBitmap = getResizedBitmap(asteroid.getBitmap(), (int) asteroid.getWidth(), (int) asteroid.getHeight());
 
-        float asteroidLeft = asteroid.getX();
-        float asteroidRight = asteroid.getX() + asteroid.getWidth();
-        float asteroidTop = asteroid.getY();
-        float asteroidBottom = asteroid.getY() + asteroid.getHeight();
+        int left = (int) Math.max(characterX, asteroid.getX());
+        int right = (int) Math.min(characterX + desiredWidth, asteroid.getX() + asteroid.getWidth());
+        int top = (int) Math.max(1400, asteroid.getY());
+        int bottom = (int) Math.min(1400 + desiredHeight, asteroid.getY() + asteroid.getHeight());
 
-        return spaceshipLeft < asteroidRight && spaceshipRight > asteroidLeft &&
-                spaceshipTop < asteroidBottom && spaceshipBottom > asteroidTop;
-    }
+        for (int x = left; x < right; x++) {
+            for (int y = top; y < bottom; y++) {
+                int shipX = x - (int) characterX;
+                int shipY = y - 1400;
+                int asteroidX = x - (int) asteroid.getX();
+                int asteroidY = y - (int) asteroid.getY();
 
-    private boolean checkShieldCollision(Shield shield) {
-        float spaceshipLeft = characterX;
-        float spaceshipRight = characterX + desiredWidth;
-        float spaceshipTop = 1400;
-        float spaceshipBottom = 1400 + desiredHeight;
-
-        float shieldLeft = shield.getX();
-        float shieldRight = shield.getX() + shield.getWidth();
-        float shieldTop = shield.getY();
-        float shieldBottom = shield.getY() + shield.getHeight();
-
-        if (shieldRight > spaceshipLeft && shieldLeft < spaceshipRight &&
-                shieldBottom > spaceshipTop && shieldTop < spaceshipBottom) {
-            isShieldActive = true;
-            power = true;
-            return true;
+                if (isPixelOpaque(spaceshipBitmap, shipX, shipY) && isPixelOpaque(asteroidBitmap, asteroidX, asteroidY)) {
+                    return true; // Collision détectée
+                }
+            }
         }
         return false;
     }
+
+    private boolean checkShieldCollision(Shield shield) {
+        Bitmap spaceshipBitmap = getResizedBitmap(characterBitmap, desiredWidth, desiredHeight);
+        Bitmap shieldBitmap = getResizedBitmap(shield.getBitmap(), shield.getWidth(), shield.getHeight());
+
+        int left = (int) Math.max(characterX, shield.getX());
+        int right = (int) Math.min(characterX + desiredWidth, shield.getX() + shield.getWidth());
+        int top = (int) Math.max(1400, shield.getY());
+        int bottom = (int) Math.min(1400 + desiredHeight, shield.getY() + shield.getHeight());
+
+        for (int x = left; x < right; x++) {
+            for (int y = top; y < bottom; y++) {
+                int shipX = x - (int) characterX;
+                int shipY = y - 1400;
+                int shieldX = x - (int) shield.getX();
+                int shieldY = y - (int) shield.getY();
+
+                if (isPixelOpaque(spaceshipBitmap, shipX, shipY) && isPixelOpaque(shieldBitmap, shieldX, shieldY)) {
+                    isShieldActive = true;
+                    power = true;
+                    return true; // Collision avec un pixel opaque du bouclier
+                }
+            }
+        }
+        return false;
+    }
+
+
+
+    private boolean isPixelOpaque(Bitmap bitmap, int x, int y) {
+        if (x < 0 || x >= bitmap.getWidth() || y < 0 || y >= bitmap.getHeight()) {
+            return false; // Hors limites
+        }
+
+        int pixel = bitmap.getPixel(x, y);
+        return (pixel >> 24) != 0; // Vérifie si l’alpha est différent de 0
+    }
+
 
     private void stopGame() {
         isGameOver = true;  

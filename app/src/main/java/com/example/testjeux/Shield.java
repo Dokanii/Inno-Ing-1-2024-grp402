@@ -44,4 +44,9 @@ public class Shield {
     public int getHeight() {
         return height;
     }
+
+    public Bitmap getBitmap() {
+        return bitmap;
+    }
+
 }
