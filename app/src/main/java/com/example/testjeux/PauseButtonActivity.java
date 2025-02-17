@@ -14,6 +14,7 @@ public class PauseButtonActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pause_button);
+        MusicManager.pauseMusic();
 
         Objects.requireNonNull(getSupportActionBar()).hide();
 
@@ -21,6 +22,7 @@ public class PauseButtonActivity extends AppCompatActivity {
         buttonRetour.setText("Retour");
 
         buttonRetour.setOnClickListener(v -> {
+            MusicManager.startMusic(this);
             TriangleActivity.resetPauseButtonState();
             setResult(RESULT_FIRST_USER);  // Custom result code for resuming the game
             finish();
@@ -29,6 +31,7 @@ public class PauseButtonActivity extends AppCompatActivity {
         Button buttonRecommencer = findViewById(R.id.button_recommencer);
 
         buttonRecommencer.setOnClickListener(v -> {
+            MusicManager.restartMusic(this);
             TriangleActivity.resetPauseButtonState();
             Intent intent = new Intent();
             setResult(RESULT_OK, intent);  // Signal that we want to restart
@@ -38,6 +41,7 @@ public class PauseButtonActivity extends AppCompatActivity {
         Button buttonRetourMenu = findViewById(R.id.button_retourMenu);
 
         buttonRetourMenu.setOnClickListener(v -> {
+            MusicManager.restartMusic(this);
             TriangleActivity.resetPauseButtonState();
             Intent intent = new Intent();
             setResult(RESULT_CANCELED, intent);  // Signal that we want to go back to the menu

@@ -26,4 +26,25 @@ public class MusicManager {
             mediaPlayer = null;
         }
     }
+
+    public static void pauseMusic() {
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+        }
+    }
+
+    public static void restartMusic(Context context) {
+        stopMusic();  // Arrête et libère le MediaPlayer
+        startMusic(context);  // Redémarre la musique
+    }
+
+    public static void playGameOverMusic(Context context) {
+        stopMusic(); // Arrête la musique principale
+
+        Uri uri = Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.game_over_song);
+        mediaPlayer = MediaPlayer.create(context, uri);
+        mediaPlayer.setLooping(false); // Jouer une seule fois
+        mediaPlayer.start();
+    }
+
 }

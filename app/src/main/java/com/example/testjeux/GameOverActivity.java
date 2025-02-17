@@ -19,11 +19,14 @@ public class GameOverActivity extends AppCompatActivity {
         // Supprimer la barre d'action
         Objects.requireNonNull(getSupportActionBar()).hide();
 
+        MusicManager.playGameOverMusic(this);
+
         Button restartButton = findViewById(R.id.restartButton);
         restartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Restart la partie
+                MusicManager.restartMusic(GameOverActivity.this);
                 Intent intent = new Intent(GameOverActivity.this, TriangleActivity.class);
                 startActivity(intent);
                 finish();
