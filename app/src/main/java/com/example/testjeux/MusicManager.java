@@ -1,6 +1,7 @@
 package com.example.testjeux;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
 
@@ -9,6 +10,10 @@ public class MusicManager {
     private static MediaPlayer mediaPlayer;
 
     public static void startMusic(Context context) {
+        if (!isMusicEnabled(context)) {
+            return; // Ne pas jouer la musique si elle est désactivée
+        }
+
         if (mediaPlayer == null) {
             Uri uri = Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.duelo_maestro);
             mediaPlayer = MediaPlayer.create(context, uri);
@@ -18,6 +23,7 @@ public class MusicManager {
             mediaPlayer.start();
         }
     }
+
 
     public static void stopMusic() {
         if (mediaPlayer != null) {
@@ -46,5 +52,11 @@ public class MusicManager {
         mediaPlayer.setLooping(false); // Jouer une seule fois
         mediaPlayer.start();
     }
+
+    public static boolean isMusicEnabled(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences("GameSettings", Context.MODE_PRIVATE);
+        return preferences.getBoolean("musicEnabled", true);
+    }
+
 
 }

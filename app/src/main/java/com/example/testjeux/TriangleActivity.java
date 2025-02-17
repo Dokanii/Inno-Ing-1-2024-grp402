@@ -30,6 +30,13 @@ public class TriangleActivity extends AppCompatActivity {
             startActivityForResult(intent, REQUEST_CODE_PAUSE);
             PauseButtonState = true;
         });
+
+        Button settingsButton = findViewById(R.id.settingsButton);
+        settingsButton.setOnClickListener(v -> {
+            Intent intent = new Intent(TriangleActivity.this, SettingsActivity.class);
+            startActivity(intent);
+        });
+
     }
 
     @Override

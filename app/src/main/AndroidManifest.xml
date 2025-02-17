@@ -32,6 +32,9 @@
         <!-- Déclaration de l'activité Game Over -->
         <activity android:name=".GameOverActivity" />
 
+        <activity android:name=".SettingsActivity" />
+
+
 
 
     </application>

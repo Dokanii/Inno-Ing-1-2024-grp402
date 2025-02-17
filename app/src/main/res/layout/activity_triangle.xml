@@ -7,22 +7,33 @@
     android:orientation="vertical"
     android:scaleType="fitXY">
 
-    <com.example.testjeux.PauseButton
-        android:id="@+id/pauseButton"
-        android:layout_width="wrap_content"
+    <!-- Barre supérieure contenant le bouton Pause et Paramètres -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:foreground="@drawable/pause"
-        android:scaleX="1.4"
-        android:layout_gravity="bottom|end"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="280dp" />
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:padding="16dp">
 
+        <com.example.testjeux.PauseButton
+            android:id="@+id/pauseButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:foreground="@drawable/pause"
+            android:scaleX="1.4"
+            android:layout_marginEnd="16dp" />
+
+        <Button
+            android:id="@+id/settingsButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⚙" />
+    </LinearLayout>
+
+    <!-- Zone de jeu -->
     <com.example.testjeux.TriangleView
         android:id="@+id/triangleView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
-
-
 </LinearLayout>
