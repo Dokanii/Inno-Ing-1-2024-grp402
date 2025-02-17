@@ -22,6 +22,7 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Stack;
 
 public class TriangleView extends View {
 
@@ -57,6 +58,20 @@ public class TriangleView extends View {
     private static final int INITIAL_ASTEROID_GENERATION_DELAY = 1600; // Délai initial de génération des astérooïdes
     private int asteroidGenerationDelay = INITIAL_ASTEROID_GENERATION_DELAY;
 
+    private List<Missile> missiles = new ArrayList<>();
+    private List<MissilePack> missilePacks = new ArrayList<>();
+    private Bitmap missileBitmap;
+    private Bitmap missilePackBitmap;
+
+    private Bitmap missileIconBitmap;
+    private boolean canShoot = false; // Le joueur peut tirer ?
+
+    private Stack<Bitmap> missileStack = new Stack<>();  // Pile de missiles stockés
+    private float missileIconX, missileIconY; // Position de l’icône du missile
+    private static final int MAX_MISSILES = 5;  // Nombre max de missiles stockables
+
+
+
     public TriangleView(Context context) {
         super(context);
         init(context);
@@ -91,6 +106,18 @@ public class TriangleView extends View {
         startGeneratingAsteroids();
         startUpdatingAsteroids();
         startGeneratingShield();
+
+        missileBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.laser);
+        missilePackBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.missile);
+        startGeneratingMissilePacks();
+
+        missileIconBitmap = getResizedBitmap(
+                BitmapFactory.decodeResource(getResources(), R.drawable.missile),
+                115, // Largeur de l'icône du missile
+                115  // Hauteur de l'icône du missile
+        );
+
+
     }
 
     @Override
@@ -124,10 +151,22 @@ public class TriangleView extends View {
             canvas.drawBitmap(resizedShieldOnShipBitmap, characterX - 50, 1400 - 50, null);
         }
 
+        for (Missile missile : missiles) {
+            missile.draw(canvas);
+        }
+
+        for (MissilePack pack : missilePacks) {
+            pack.draw(canvas);
+        }
+
+        drawMissileIcons(canvas);
+
+
         Paint scorePaint = new Paint();
         scorePaint.setTextSize(60);
         scorePaint.setColor(Color.WHITE);
         canvas.drawText("Score: " + score, 33, 50, scorePaint);
+
     }
 
     private Bitmap getResizedBitmap(Bitmap bitmap, int width, int height) {
@@ -141,19 +180,43 @@ public class TriangleView extends View {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    @Override
 
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
+        float touchX = event.getX();
+        float touchY = event.getY();
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                float touchX = event.getX();
-                moveCharacter(touchX > (float) getWidth() / 2);
+                // Vérifier si le joueur touche une icône de missile
+                if (!missileStack.isEmpty()) {
+                    float iconWidth = 80; // Taille d'une icône de missile
+                    float iconHeight = 80;
+                    float startX = getWidth() / 2 - (missileStack.size() * 50) / 2;
+                    float startY = getHeight() - 120;
+
+                    // Vérifie si le toucher est dans la zone des icônes de missile
+                    for (int i = 0; i < missileStack.size(); i++) {
+                        float missileX = startX + i * 50;
+                        float missileY = startY;
+
+                        if (touchX >= missileX && touchX <= missileX + iconWidth &&
+                                touchY >= missileY && touchY <= missileY + iconHeight) {
+                            shootMissile();
+                            return true; // Évite d'interpréter ce clic comme un déplacement du vaisseau
+                        }
+                    }
+                }
+
+                // Si le joueur ne touche pas une icône de missile, il peut déplacer le vaisseau
+                moveCharacter(touchX > getWidth() / 2);
                 showFlamme();
                 break;
+
             case MotionEvent.ACTION_MOVE:
-                touchX = event.getX();
                 moveCharacter(touchX > (float) getWidth() / 2);
                 break;
+
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 isMoving = false;
@@ -263,15 +326,42 @@ public class TriangleView extends View {
 
     private void update() {
         boolean collisionDetected = false;
-        if (!TriangleActivity.getPauseButtonState()){
+
+        if (!TriangleActivity.getPauseButtonState()) {
             updateAsteroids();
             updateShields();
         }
+
         frameCount++;
         if (frameCount % (60 * 10) == 0) {
             generateShield();
         }
 
+        // Mise à jour des missiles
+        Iterator<Missile> missileIterator = missiles.iterator();
+        while (missileIterator.hasNext()) {
+            Missile missile = missileIterator.next();
+            missile.update();
+
+            // Vérification de la collision avec les astéroïdes
+            Iterator<Asteroid> asteroidIterator = asteroids.iterator();
+            while (asteroidIterator.hasNext()) {
+                Asteroid asteroid = asteroidIterator.next();
+                if (missile.checkCollision(asteroid)) {
+                    missile.destroy();  // Désactive le missile
+                    asteroidIterator.remove();  // Supprime l'astéroïde
+                    missileIterator.remove();  // Supprime le missile
+                    break;  // Sort de la boucle car un missile ne peut toucher qu'un astéroïde
+                }
+            }
+
+            // Supprimer le missile s'il sort de l'écran
+            if (missile.getY() < 0) {
+                missileIterator.remove();
+            }
+        }
+
+        // Vérification de la collision avec les astéroïdes (pour le vaisseau)
         Iterator<Asteroid> asteroidIterator = asteroids.iterator();
         while (asteroidIterator.hasNext()) {
             Asteroid asteroid = asteroidIterator.next();
@@ -292,6 +382,7 @@ public class TriangleView extends View {
             }
         }
 
+        // 🔹 **Mise à jour et gestion des boucliers**
         Iterator<Shield> shieldIterator = shields.iterator();
         while (shieldIterator.hasNext()) {
             Shield shield = shieldIterator.next();
@@ -301,8 +392,18 @@ public class TriangleView extends View {
             }
         }
 
-        invalidate();
+        // Vérification de la collision avec les packs de missiles
+        Iterator<MissilePack> packIterator = missilePacks.iterator();
+        while (packIterator.hasNext()) {
+            MissilePack pack = packIterator.next();
+            pack.update();
+            if (checkMissilePackCollision(pack)) {
+                canShoot = true;  // Active la possibilité de tirer
+                packIterator.remove();
+            }
+        }
     }
+
 
     private void startGeneratingAsteroids() {
         Runnable asteroidGenerator = new Runnable() {
@@ -458,4 +559,86 @@ public class TriangleView extends View {
         };
         post(shieldGenerator);
     }
+
+    private void generateMissilePack() {
+        int packX = (int) (Math.random() * getWidth());
+        int packY = 0;
+        Bitmap resizedMissilePackBitmap = getResizedBitmap(missilePackBitmap, 100, 100);
+        if (!TriangleActivity.getPauseButtonState()) {
+            MissilePack pack = new MissilePack(getContext(), packX, packY, resizedMissilePackBitmap);
+            missilePacks.add(pack);
+        }
+    }
+
+    private void startGeneratingMissilePacks() {
+        Runnable missilePackGenerator = new Runnable() {
+            @Override
+            public void run() {
+                if (!isGameOver) {
+                    generateMissilePack();
+                    postDelayed(this, 20000); // Un pack toutes les 20 secondes
+                }
+            }
+        };
+        post(missilePackGenerator);
+    }
+
+    private boolean checkMissilePackCollision(MissilePack pack) {
+        Bitmap spaceshipBitmap = getResizedBitmap(characterBitmap, desiredWidth, desiredHeight);
+        Bitmap packBitmap = getResizedBitmap(pack.getBitmap(), pack.getWidth(), pack.getHeight());
+
+        int left = (int) Math.max(characterX, pack.getX());
+        int right = (int) Math.min(characterX + desiredWidth, pack.getX() + pack.getWidth());
+        int top = (int) Math.max(1400, pack.getY());
+        int bottom = (int) Math.min(1400 + desiredHeight, pack.getY() + pack.getHeight());
+
+        for (int x = left; x < right; x++) {
+            for (int y = top; y < bottom; y++) {
+                int shipX = x - (int) characterX;
+                int shipY = y - 1400;
+                int packX = x - (int) pack.getX();
+                int packY = y - (int) pack.getY();
+
+                if (isPixelOpaque(spaceshipBitmap, shipX, shipY) && isPixelOpaque(packBitmap, packX, packY)) {
+                    if (missileStack.size() < MAX_MISSILES) {  // Limite de stockage
+                        missileStack.push(getResizedBitmap(missileBitmap, 80, 80));
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    private void shootMissile() {
+        if (!missileStack.isEmpty()) {
+            missileStack.pop(); // Retire un missile stocké
+
+            Bitmap resizedMissileBitmap = getResizedBitmap(missileBitmap, 50, 100);
+            Missile missile = new Missile(getContext(), characterX + desiredWidth / 2 - 25, 1300, resizedMissileBitmap);
+            missiles.add(missile);
+        }
+    }
+
+
+    private void drawMissileIcons(Canvas canvas) {
+        float startX = getWidth() / 2 - (missileStack.size() * 50) / 2; // Centrage des icônes
+        float startY = getHeight() - 120; // Position en bas de l’écran
+
+        for (int i = 0; i < missileStack.size(); i++) {
+            canvas.drawBitmap(missileIconBitmap, startX + i * 50, startY, null);
+        }
+
+        // Sauvegarde la position de la première icône pour la détection tactile
+        if (!missileStack.isEmpty()) {
+            missileIconX = startX;
+            missileIconY = startY;
+        }
+    }
+
+
+    //maintenant je veux que quand on ramasse un missile, au lieu de le tire dès que l'on fait bouger le vaisseau, l'image du missile est palacer un bas au milieu et quand le joueur touche l'image du missile, le vaiseau tire le missile et l'image sur laquel il à appuyer disparait
+
+
 }
