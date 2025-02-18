@@ -3,6 +3,7 @@ package com.example.testjeux;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.Switch;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,5 +44,17 @@ public class SettingsActivity extends AppCompatActivity {
                 MusicManager.pauseMusic();
             }
         });
+
+        Button buttonRetour = findViewById(R.id.retourButton);
+        buttonRetour.setText("Retour");
+
+        buttonRetour.setOnClickListener(v -> {
+            MusicManager.startMusic(this);
+            TriangleActivity.resetPauseButtonState();
+            setResult(RESULT_FIRST_USER);  // Custom result code for resuming the game
+            finish();
+        });
     }
+
+
 }
