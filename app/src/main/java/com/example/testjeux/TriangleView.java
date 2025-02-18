@@ -501,10 +501,10 @@ public class TriangleView extends View {
         isGameOver = true;  
         isMoving = false;
 
-        // Start GameOverActivity
-        Context context = getContext();
-        Intent intent = new Intent(context, GameOverActivity.class);
-        context.startActivity(intent);
+        // Créer l'intent et ajouter le score en extra
+        Intent intent = new Intent(getContext(), GameOverActivity.class);
+        intent.putExtra("score", score);
+        getContext().startActivity(intent);
 
         // Terminer l'activité en cours
         Activity activity = getActivity();
@@ -638,7 +638,7 @@ public class TriangleView extends View {
     }
 
 
-    //maintenant je veux que quand on ramasse un missile, au lieu de le tire dès que l'on fait bouger le vaisseau, l'image du missile est palacer un bas au milieu et quand le joueur touche l'image du missile, le vaiseau tire le missile et l'image sur laquel il à appuyer disparait
+
 
 
 }

@@ -1,6 +1,7 @@
 package com.example.testjeux;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.widget.Button;
@@ -59,6 +60,7 @@ public class TriangleActivity extends AppCompatActivity {
             }
         }
     }
+
 
     public static boolean getPauseButtonState() {
         return PauseButtonState;
