@@ -70,6 +70,9 @@ public class TriangleView extends View {
     private float missileIconX, missileIconY; // Position de l’icône du missile
     private static final int MAX_MISSILES = 5;  // Nombre max de missiles stockables
 
+    private List<ExplosionGif> explosions = new ArrayList<>();
+
+
 
 
     public TriangleView(Context context) {
@@ -158,6 +161,11 @@ public class TriangleView extends View {
         for (MissilePack pack : missilePacks) {
             pack.draw(canvas);
         }
+
+        for (ExplosionGif explosion : explosions) {
+            explosion.draw(canvas);
+        }
+
 
         drawMissileIcons(canvas);
 
@@ -349,6 +357,9 @@ public class TriangleView extends View {
                 Asteroid asteroid = asteroidIterator.next();
                 if (missile.checkCollision(asteroid)) {
                     missile.destroy();  // Désactive le missile
+                    // Créer l'explosion à la position de l'astéroïde avec le GIF
+                    ExplosionGif explosion = new ExplosionGif(getContext(), R.raw.explosion, (int)asteroid.getX(), (int)asteroid.getY());
+                    explosions.add(explosion);
                     asteroidIterator.remove();  // Supprime l'astéroïde
                     missileIterator.remove();  // Supprime le missile
                     break;  // Sort de la boucle car un missile ne peut toucher qu'un astéroïde
@@ -370,6 +381,9 @@ public class TriangleView extends View {
                 if (isShieldActive) {
                     isShieldActive = false;
                     asteroidIterator.remove();
+                    // Créer l'explosion à la position de l'astéroïde avec le GIF
+                    ExplosionGif explosion = new ExplosionGif(getContext(), R.raw.explosion, (int)asteroid.getX(), (int)asteroid.getY());
+                    explosions.add(explosion);
                     power = false;
                 } else {
                     stopGame();
@@ -400,6 +414,15 @@ public class TriangleView extends View {
             if (checkMissilePackCollision(pack)) {
                 canShoot = true;  // Active la possibilité de tirer
                 packIterator.remove();
+            }
+        }
+
+        Iterator<ExplosionGif> explosionIterator = explosions.iterator();
+        while (explosionIterator.hasNext()) {
+            ExplosionGif explosion = explosionIterator.next();
+            explosion.update();
+            if (explosion.isFinished()) {
+                explosionIterator.remove();
             }
         }
     }
