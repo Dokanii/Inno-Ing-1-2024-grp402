@@ -11,6 +11,7 @@ public class ExplosionGif {
     private int x, y;
     private boolean finished;
 
+
     public ExplosionGif(Context context, int resourceId, int x, int y) {
         // Charge le GIF depuis les ressources (par exemple dans res/raw/explosion.gif)
         movie = Movie.decodeStream(context.getResources().openRawResource(resourceId));
