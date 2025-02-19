@@ -54,4 +54,16 @@ public class Missile {
     public float getY() {
         return y;
     }
+
+    public Bitmap getBitmap() {
+        return bitmap;
+    }
+
+    public float getX() {
+        return x;  // Remplace 'x' par le nom exact de la variable de position dans ta classe
+    }
+
+
+
+
 }

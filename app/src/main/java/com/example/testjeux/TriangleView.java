@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
+import java.util.Random;
+
 
 public class TriangleView extends View {
 
@@ -72,6 +74,12 @@ public class TriangleView extends View {
 
     private List<ExplosionGif> explosions = new ArrayList<>();
 
+    private List<Turret> turrets = new ArrayList<>();
+    private static List<TurretBullet> enemyBullets = new ArrayList<>();
+
+    public static void addEnemyBullet(TurretBullet bullet) {
+        enemyBullets.add(bullet);
+    }
 
 
 
@@ -79,6 +87,7 @@ public class TriangleView extends View {
         super(context);
         init(context);
     }
+
 
     public TriangleView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -166,6 +175,11 @@ public class TriangleView extends View {
             explosion.draw(canvas);
         }
 
+        for (Turret turret : turrets) {
+            turret.draw(canvas);
+        }
+
+
 
         drawMissileIcons(canvas);
 
@@ -174,6 +188,12 @@ public class TriangleView extends View {
         scorePaint.setTextSize(60);
         scorePaint.setColor(Color.WHITE);
         canvas.drawText("Score: " + score, 33, 50, scorePaint);
+
+        Paint bulletPaint = new Paint();
+        for (TurretBullet bullet : enemyBullets) {
+            bullet.draw(canvas);
+        }
+
 
     }
 
@@ -425,6 +445,49 @@ public class TriangleView extends View {
                 explosionIterator.remove();
             }
         }
+
+        if (frameCount % (60 * 10) == 0) {  // Toutes les 10 secondes
+            generateTurret();
+        }
+
+        Iterator<Turret> turretIterator = turrets.iterator();
+        while (turretIterator.hasNext()) {
+            Turret turret = turretIterator.next();
+            turret.update();
+
+            // Réutiliser l'iterator déjà défini ailleurs dans update()
+            for (int i = 0; i < missiles.size(); i++) {
+                Missile missile = missiles.get(i);
+                if (turret.checkCollision(missile)) {
+                    missiles.remove(i);
+                    turretIterator.remove();
+                    ExplosionGif explosion = new ExplosionGif(getContext(), R.raw.explosion, (int)turret.getX(), (int)turret.getY());
+                    explosions.add(explosion);
+                    break;
+                }
+            }
+        }
+
+        Iterator<TurretBullet> bulletIterator = enemyBullets.iterator();
+        while (bulletIterator.hasNext()) {
+            TurretBullet bullet = bulletIterator.next();
+            bullet.update();
+
+            if (bullet.checkCollision(characterX, 1400, desiredWidth, desiredHeight)) {
+                if (isShieldActive) {
+                    // Le bouclier est actif : le missile est absorbé et le bouclier se désactive (ou sa durabilité est réduite)
+                    isShieldActive = false;
+                    bulletIterator.remove();
+                } else {
+                    // Sinon, le missile touche le vaisseau et le jeu se termine
+                    stopGame();
+                    return;
+                }
+            }
+        }
+
+
+
     }
 
 
@@ -659,6 +722,19 @@ public class TriangleView extends View {
             missileIconY = startY;
         }
     }
+
+    private void generateTurret() {
+        Random random = new Random();
+        int turretX = random.nextInt(getWidth() - 100); // Position aléatoire en haut de l'écran
+        int turretY = random.nextInt(400); // Ne pas trop haut ni trop bas
+
+        Bitmap turretBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.spaceship);
+        turretBitmap = Bitmap.createScaledBitmap(turretBitmap, desiredWidth, desiredHeight, true);
+
+        Turret turret = new Turret(getContext(), turretBitmap, turretX, turretY);
+        turrets.add(turret);
+    }
+
 
 
 
