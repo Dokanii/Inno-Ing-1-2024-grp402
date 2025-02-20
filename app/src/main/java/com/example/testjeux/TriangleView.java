@@ -82,6 +82,9 @@ public class TriangleView extends View {
         enemyBullets.add(bullet);
     }
 
+    private List<KamikazeShip> kamikazeShips = new ArrayList<>();
+
+
 
 
     public TriangleView(Context context) {
@@ -179,6 +182,11 @@ public class TriangleView extends View {
         for (Turret turret : turrets) {
             turret.draw(canvas);
         }
+
+        for (KamikazeShip ship : kamikazeShips) {
+            ship.draw(canvas);
+        }
+
 
 
 
@@ -356,14 +364,19 @@ public class TriangleView extends View {
     private void update() {
         boolean collisionDetected = false;
 
-        if (!TriangleActivity.getPauseButtonState()) {
-            updateAsteroids();
-            updateShields();
-        }
+        if (TriangleActivity.getPauseButtonState()) return;
+
+        updateAsteroids();
+        updateShields();
+
 
         frameCount++;
         if (frameCount % (60 * 10) == 0) {
             generateShield();
+        }
+
+        if (frameCount % (60 * 15) == 0) {
+            generateKamikazeShip();
         }
 
         // Mise à jour des missiles
@@ -486,6 +499,31 @@ public class TriangleView extends View {
                 }
             }
         }
+
+        Iterator<KamikazeShip> shipIterator = kamikazeShips.iterator();
+        while (shipIterator.hasNext()) {
+            KamikazeShip ship = shipIterator.next();
+            ship.update(characterX); // Suivre la position du joueur
+
+            // Vérifier si le vaisseau kamikaze touche le joueur
+            if (ship.checkCollision(characterX, 1400, desiredWidth, desiredHeight)) {
+                if (isShieldActive) {
+                    isShieldActive = false; // Le bouclier absorbe l'impact
+                    shipIterator.remove();
+                    ExplosionGif explosion = new ExplosionGif(getContext(), R.raw.explosion, (int)ship.getX(), (int)ship.getY());
+                    explosions.add(explosion);
+                } else {
+                    stopGame(); // Game Over si pas de bouclier
+                    return;
+                }
+            }
+
+            // Supprimer le vaisseau s'il sort de l'écran
+            if (ship.isOutOfScreen(getHeight())) {
+                shipIterator.remove();
+            }
+        }
+
 
 
 
@@ -746,9 +784,13 @@ public class TriangleView extends View {
         return Resources.getSystem().getDisplayMetrics().widthPixels;
     }
 
+    private void generateKamikazeShip() {
+        Random random = new Random();
+        int startX = random.nextInt(getWidth() - 100); // Position de spawn aléatoire
 
-
-
+        KamikazeShip kamikaze = new KamikazeShip(getContext(), startX);
+        kamikazeShips.add(kamikaze);
+    }
 
 
 
