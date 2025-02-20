@@ -15,6 +15,10 @@ public class Turret {
 
     private Context context;
 
+    private int shotsFired = 0; // Compteur de missiles tirés
+    private static final int MAX_SHOTS_BEFORE_MOVE = 3; // Nombre de tirs avant déplacement
+
+
 
     public Turret(Context context, Bitmap bitmap, float x, float y) {
         this.context = context;  // Stocke le contexte pour usage ultérieur
@@ -47,10 +51,18 @@ public class Turret {
 
         float bulletX = x + bitmap.getWidth() / 2;
         float bulletY = y + bitmap.getHeight();
-        // Utilise le contexte fourni au constructeur de Turret
         TurretBullet bullet = new TurretBullet(context, bulletX, bulletY);
         TriangleView.addEnemyBullet(bullet);
+
+        shotsFired++; // Incrémenter le nombre de tirs
+
+        // Si la tourelle a tiré 3 missiles, elle se déplace
+        if (shotsFired >= MAX_SHOTS_BEFORE_MOVE) {
+            moveTurret();
+            shotsFired = 0; // Réinitialiser le compteur après déplacement
+        }
     }
+
 
 
     public boolean checkCollision(Missile missile) {
@@ -76,4 +88,17 @@ public class Turret {
     public float getY() {
         return y;
     }
+
+    private void moveTurret() {
+        Random random = new Random();
+
+        // Nouvelle position aléatoire sur l'axe X (toujours visible à l'écran)
+        int newX = random.nextInt(TriangleView.getScreenWidth() - bitmap.getWidth());
+        int newY = random.nextInt(400); // Garde la tourelle en haut de l'écran
+
+        x = newX;
+        y = newY;
+    }
+
+
 }

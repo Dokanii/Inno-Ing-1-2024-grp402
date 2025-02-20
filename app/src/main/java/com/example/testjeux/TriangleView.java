@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -584,8 +585,14 @@ public class TriangleView extends View {
 
 
     private void stopGame() {
-        isGameOver = true;  
+        isGameOver = true;
         isMoving = false;
+
+        // Vider les listes pour nettoyer l'écran
+        asteroids.clear();       // Déjà existant
+        missiles.clear();        // Supprime les missiles du joueur
+        turrets.clear();         // Supprime les tourelles ennemies
+        enemyBullets.clear();    // Supprime les missiles ennemis
 
         // Créer l'intent et ajouter le score en extra
         Intent intent = new Intent(getContext(), GameOverActivity.class);
@@ -728,12 +735,17 @@ public class TriangleView extends View {
         int turretX = random.nextInt(getWidth() - 100); // Position aléatoire en haut de l'écran
         int turretY = random.nextInt(400); // Ne pas trop haut ni trop bas
 
-        Bitmap turretBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.spaceship);
+        Bitmap turretBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.spaceship2);
         turretBitmap = Bitmap.createScaledBitmap(turretBitmap, desiredWidth, desiredHeight, true);
 
         Turret turret = new Turret(getContext(), turretBitmap, turretX, turretY);
         turrets.add(turret);
     }
+
+    public static int getScreenWidth() {
+        return Resources.getSystem().getDisplayMetrics().widthPixels;
+    }
+
 
 
 
